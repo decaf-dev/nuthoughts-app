@@ -1,6 +1,8 @@
+import 'package:chisel/controllers/app_controller.dart';
 import 'package:chisel/routes/saved_blocks/saved_blocks_route.dart';
 import 'package:chisel/routes/settings/settings_route.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class HomeRoute extends StatefulWidget {
   const HomeRoute({super.key, required this.title});
@@ -12,11 +14,12 @@ class HomeRoute extends StatefulWidget {
 }
 
 class _HomeRouteState extends State<HomeRoute> {
-  final myController = TextEditingController();
+  final textFieldController = TextEditingController();
+  final AppController appController = Get.find();
 
   @override
   void dispose() {
-    myController.dispose();
+    textFieldController.dispose();
     super.dispose();
   }
 
@@ -63,7 +66,7 @@ class _HomeRouteState extends State<HomeRoute> {
               Container(
                   padding: const EdgeInsets.all(20),
                   child: TextField(
-                      controller: myController,
+                      controller: textFieldController,
                       autofocus: true,
                       keyboardType: TextInputType.multiline,
                       minLines: 5,
@@ -71,8 +74,10 @@ class _HomeRouteState extends State<HomeRoute> {
               MaterialButton(
                 color: Colors.blue,
                 textColor: Colors.white,
-                onPressed: () {
-                  myController.clear();
+                onPressed: () async {
+                  bool success =
+                      await appController.saveText(textFieldController.text);
+                  if (success) textFieldController.clear();
                 },
                 child: const Text("Save"),
               )
