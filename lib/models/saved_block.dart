@@ -16,7 +16,7 @@ class SavedBlock {
 
   Map<String, dynamic> toJson() {
     return {
-      'submissionDateTime': submissionDateTime.millisecondsSinceEpoch,
+      'submissionTime': submissionDateTime.millisecondsSinceEpoch,
       'text': text,
     };
   }
