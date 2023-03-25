@@ -43,14 +43,14 @@ class AppController extends GetxController {
   }
 
   Future<bool> saveBlocks(List<SavedBlock> blocks) async {
+    print(jsonEncode(blocks.map((block) => block.toJson()).toList()));
     try {
       final response = await http.post(
         Uri.parse('http://<url>/save-blocks'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
-        body: jsonEncode(
-            blocks.map((block) => block.toJson()).toList().toString()),
+        body: jsonEncode(blocks.map((block) => block.toJson()).toList()),
       );
       if (response.statusCode == 201) {
         return true;
