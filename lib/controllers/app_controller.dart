@@ -74,15 +74,20 @@ class AppController extends GetxController {
     }
   }
 
-  setIpAddress(String value) async {
+  void setIpAddress(String value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(Constants.ipAddressKey, value);
     ipAddress.value = value;
   }
 
-  setPort(String value) async {
+  void setPort(String value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(Constants.portKey, value);
     port.value = value;
+  }
+
+  void setText(String value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(Constants.textKey, value);
   }
 }

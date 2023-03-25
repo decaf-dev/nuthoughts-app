@@ -1,9 +1,11 @@
+import 'package:chisel_notes/constants.dart';
 import 'package:chisel_notes/controllers/app_controller.dart';
 import 'package:chisel_notes/routes/saved_blocks/saved_blocks_route.dart';
 import 'package:chisel_notes/routes/settings/settings_route.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeRoute extends StatefulWidget {
   const HomeRoute({super.key, required this.title});
@@ -15,8 +17,21 @@ class HomeRoute extends StatefulWidget {
 }
 
 class _HomeRouteState extends State<HomeRoute> {
-  final textFieldController = TextEditingController();
-  final AppController appController = Get.find();
+  final AppController controller = Get.find();
+  final TextEditingController textFieldController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    initializeTextController();
+  }
+
+  void initializeTextController() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      textFieldController.text = prefs.getString(Constants.textKey) ?? '';
+    });
+  }
 
   @override
   void dispose() {
@@ -64,10 +79,13 @@ class _HomeRouteState extends State<HomeRoute> {
                 children: <Widget>[
                   TextField(
                       controller: textFieldController,
+                      onChanged: (value) {
+                        controller.setText(value);
+                      },
                       autofocus: true,
-                      enabled: appController.isLoading.value != true,
+                      enabled: controller.isLoading.value != true,
                       style: TextStyle(
-                          color: appController.isLoading.value
+                          color: controller.isLoading.value
                               ? Colors.grey
                               : Colors.black),
                       decoration: InputDecoration(
@@ -87,10 +105,10 @@ class _HomeRouteState extends State<HomeRoute> {
                       minLines: 10,
                       maxLines: null),
                   const SizedBox(height: 20),
-                  if (appController.isLoading.value == true) ...[
+                  if (controller.isLoading.value == true) ...[
                     const CircularProgressIndicator(color: Colors.blue)
                   ],
-                  if (appController.isLoading.value == false) ...[
+                  if (controller.isLoading.value == false) ...[
                     MaterialButton(
                       color: Colors.blue,
                       textColor: Colors.white,
@@ -98,10 +116,11 @@ class _HomeRouteState extends State<HomeRoute> {
                         String text = textFieldController.text;
                         if (text.isNotEmpty) {
                           FocusManager.instance.primaryFocus?.unfocus();
-                          bool success = await appController
+                          bool success = await controller
                               .saveText(textFieldController.text);
                           if (success) {
                             textFieldController.clear();
+                            controller.setText("");
                           } else {
                             Fluttertoast.showToast(
                               msg: 'An error occurred while submitting data.',
