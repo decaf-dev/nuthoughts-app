@@ -26,6 +26,10 @@ Open a terminal and in the root directory of the repository run the project
 
 - `flutter run`
 
+### Production
+
+- `flutter build`
+
 ## Debugging
 
 If the app stalls during development on Android, you can try uninstalling it
