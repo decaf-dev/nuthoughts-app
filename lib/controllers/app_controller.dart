@@ -1,14 +1,24 @@
 import 'dart:convert';
 
+import 'package:chisel_notes/constants.dart';
 import 'package:chisel_notes/models/saved_block.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AppController extends GetxController {
   final savedBlocks = <SavedBlock>[];
   final isLoading = false.obs;
-  final ipAddress = 'localhost'.obs;
-  final port = '9005'.obs;
+  final ipAddress = ''.obs;
+  final port = ''.obs;
+
+  @override
+  void onInit() async {
+    final prefs = await SharedPreferences.getInstance();
+    ipAddress.value = prefs.getString(Constants.ipAddressKey) ?? 'localhost';
+    port.value = prefs.getString(Constants.portKey) ?? '9005';
+    super.onInit();
+  }
 
   int getNextBlockId(int bufferLength) {
     return savedBlocks.length + bufferLength + 1;
@@ -62,5 +72,17 @@ class AppController extends GetxController {
     } catch (err) {
       return false;
     }
+  }
+
+  setIpAddress(String value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(Constants.ipAddressKey, value);
+    ipAddress.value = value;
+  }
+
+  setPort(String value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(Constants.portKey, value);
+    port.value = value;
   }
 }

@@ -1,7 +1,5 @@
 import 'package:chisel_notes/controllers/app_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:get/get.dart';
 import 'package:settings_ui/settings_ui.dart';
 
@@ -32,7 +30,7 @@ class _SettingsRouteState extends State<SettingsRoute> {
                     title: const Text('IP Address'),
                     value: Text(controller.ipAddress.value),
                     onPressed: (BuildContext context) {
-                      _showSettingDialog("IP Address", controller.ipAddress);
+                      _showSettingDialog("IP Address", controller.setIpAddress);
                     },
                   ),
                   SettingsTile.navigation(
@@ -40,7 +38,7 @@ class _SettingsRouteState extends State<SettingsRoute> {
                     title: const Text('Port'),
                     value: Text(controller.port.value),
                     onPressed: (BuildContext context) {
-                      _showSettingDialog("Port", controller.port);
+                      _showSettingDialog("Port", controller.setPort);
                     },
                   ),
                 ],
@@ -50,10 +48,7 @@ class _SettingsRouteState extends State<SettingsRoute> {
         ));
   }
 
-  void _showSettingDialog(
-    String title,
-    Rx<String> setting,
-  ) {
+  void _showSettingDialog(String title, Function(String value) onSave) {
     final textController = TextEditingController();
     showDialog(
         context: context,
@@ -69,7 +64,7 @@ class _SettingsRouteState extends State<SettingsRoute> {
                   child: const Text('Close')),
               TextButton(
                 onPressed: () {
-                  setting.value = textController.text;
+                  onSave(textController.text);
                   _dismissDialog();
                 },
                 child: const Text('Save'),
