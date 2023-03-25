@@ -1,6 +1,6 @@
 # Chisel Notes
 
-Atomic note taking app. Capture your ideas and send them in blocks to a self-hosted chisel_notes server.
+Atomic note taking app. Capture your ideas and send them to a self-hosted Chisel Notes server.
 
 ## Installation
 
