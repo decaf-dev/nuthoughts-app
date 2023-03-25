@@ -7,6 +7,8 @@ import 'package:http/http.dart' as http;
 class AppController extends GetxController {
   final savedBlocks = <SavedBlock>[];
   final isLoading = false.obs;
+  final ipAddress = 'localhost'.obs;
+  final port = '9005'.obs;
 
   int getNextBlockId(int bufferLength) {
     return savedBlocks.length + bufferLength + 1;
@@ -38,15 +40,15 @@ class AppController extends GetxController {
     }
 
     bool success = await saveBlocks(blockBuffer);
+    savedBlocks.addAll(blockBuffer);
     isLoading.value = false;
     return success;
   }
 
   Future<bool> saveBlocks(List<SavedBlock> blocks) async {
-    print(jsonEncode(blocks.map((block) => block.toJson()).toList()));
     try {
       final response = await http.post(
-        Uri.parse('http://<url>/save-blocks'),
+        Uri.parse('http://${ipAddress.value}:${port.value}/save-blocks'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },

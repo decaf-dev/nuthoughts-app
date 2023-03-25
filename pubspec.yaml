@@ -37,6 +37,7 @@ dependencies:
   get: ^4.6.5
   http: ^0.13.5
   fluttertoast: ^8.2.1
+  settings_ui: ^2.0.2
 
 dev_dependencies:
   flutter_test:
