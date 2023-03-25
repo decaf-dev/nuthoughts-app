@@ -14,11 +14,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'chisel_notes App',
+      title: 'Chisel Notes',
       theme: ThemeData(
         primarySwatch: Colors.green,
       ),
-      home: const HomeRoute(title: 'chisel_notes'),
+      home: const HomeRoute(title: 'Chisel Notes'),
     );
   }
 }
