@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.chisel">
+    package="com.example.chisel_notes">
    <application
-        android:label="chisel"
+        android:label="chisel_notes"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

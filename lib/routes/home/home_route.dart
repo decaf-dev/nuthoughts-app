@@ -1,6 +1,6 @@
-import 'package:chisel/controllers/app_controller.dart';
-import 'package:chisel/routes/saved_blocks/saved_blocks_route.dart';
-import 'package:chisel/routes/settings/settings_route.dart';
+import 'package:chisel_notes/controllers/app_controller.dart';
+import 'package:chisel_notes/routes/saved_blocks/saved_blocks_route.dart';
+import 'package:chisel_notes/routes/settings/settings_route.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

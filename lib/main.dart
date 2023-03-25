@@ -1,5 +1,5 @@
-import 'package:chisel/controllers/app_controller.dart';
-import 'package:chisel/routes/home/home_route.dart';
+import 'package:chisel_notes/controllers/app_controller.dart';
+import 'package:chisel_notes/routes/home/home_route.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -14,11 +14,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Chisel App',
+      title: 'chisel_notes App',
       theme: ThemeData(
         primarySwatch: Colors.green,
       ),
-      home: const HomeRoute(title: 'Chisel'),
+      home: const HomeRoute(title: 'chisel_notes'),
     );
   }
 }

@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:chisel/models/saved_block.dart';
+import 'package:chisel_notes/models/saved_block.dart';
 import 'package:get/get.dart';
 
 class AppController extends GetxController {

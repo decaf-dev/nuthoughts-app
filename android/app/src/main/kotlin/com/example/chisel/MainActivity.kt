@@ -1,4 +1,4 @@
-package com.example.chisel
+package com.example.chisel_notes
 
 import io.flutter.embedding.android.FlutterActivity
 
