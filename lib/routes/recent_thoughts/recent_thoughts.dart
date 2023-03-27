@@ -1,6 +1,7 @@
 import 'package:nuthoughts/controllers/app_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nuthoughts/models/thought.dart';
 
 class RecentThoughtsRoute extends StatefulWidget {
   const RecentThoughtsRoute({super.key});
@@ -24,13 +25,20 @@ class _RecentThoughtsRouteState extends State<RecentThoughtsRoute> {
         child: ListView.builder(
           itemCount: controller.recentThoughts.length,
           itemBuilder: (context, index) {
+            Thought thought =
+                controller.recentThoughts.reversed.toList()[index];
             return Card(
                 margin: const EdgeInsets.symmetric(vertical: 10),
                 child: Padding(
                     padding: const EdgeInsets.all(20),
-                    child: Text(controller.recentThoughts.reversed
-                        .toList()[index]
-                        .text)));
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(thought.text),
+                          if (!thought.hasBeenSavedOnServer()) ...[
+                            const Icon(Icons.sync_problem, color: Colors.red)
+                          ]
+                        ])));
           },
         ),
       )),
