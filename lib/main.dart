@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Chisel Notes',
       theme: ThemeData(
-        primarySwatch: Colors.green,
+        primarySwatch: Colors.deepPurple,
       ),
       home: const HomeRoute(title: 'Chisel Notes'),
     );

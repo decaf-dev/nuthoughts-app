@@ -1,13 +1,15 @@
 import 'dart:convert';
 
 import 'package:chisel_notes/constants.dart';
-import 'package:chisel_notes/models/saved_block.dart';
+import 'package:chisel_notes/models/thought.dart';
+import 'package:chisel_notes/models/sync_time.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppController extends GetxController {
-  final savedBlocks = <SavedBlock>[];
+  final recentThoughts = <Thought>[];
+  final syncTime = SyncTime();
   final isLoading = false.obs;
   final ipAddress = ''.obs;
   final port = ''.obs;
@@ -20,51 +22,28 @@ class AppController extends GetxController {
     super.onInit();
   }
 
-  int getNextBlockId(int bufferLength) {
-    return savedBlocks.length + bufferLength + 1;
+  int getNextBlockId() {
+    return recentThoughts.length + 1;
   }
 
-  Future<bool> saveText(String text) async {
-    //Set the loading icon
-    isLoading.value = true;
-
-    //We will split all of the text based on a new line
-    LineSplitter ls = const LineSplitter();
-    final List<String> lines = ls.convert(text);
-    List<SavedBlock> blockBuffer = [];
-
-    //We then will group the blocks together and save them
-    StringBuffer textBuffer = StringBuffer();
-    for (var i = 0; i < lines.length; i++) {
-      String line = lines[i];
-      if (line.isNotEmpty) textBuffer.writeln(line);
-      if (line.isEmpty || i == lines.length - 1) {
-        String block = textBuffer.toString().trim();
-        SavedBlock newBlock = SavedBlock(
-            id: getNextBlockId(blockBuffer.length),
-            submissionDateTime: DateTime.now(),
-            text: block);
-        blockBuffer.add(newBlock);
-        textBuffer.clear();
-      }
-    }
-
-    bool success = await saveBlocks(blockBuffer);
-    savedBlocks.addAll(blockBuffer);
-    isLoading.value = false;
-    return success;
+  void saveThought(String text) async {
+    Thought thought = Thought(
+        id: getNextBlockId(), creationDateTime: DateTime.now(), text: text);
+    recentThoughts.add(thought);
+    await thoughtPost(thought);
   }
 
-  Future<bool> saveBlocks(List<SavedBlock> blocks) async {
+  Future<bool> thoughtPost(Thought thought) async {
     try {
       final response = await http.post(
-        Uri.parse('http://${ipAddress.value}:${port.value}/save-blocks'),
+        Uri.parse('http://${ipAddress.value}:${port.value}/thought'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
-        body: jsonEncode(blocks.map((block) => block.toJson()).toList()),
+        body: jsonEncode(thought.toJson()),
       );
       if (response.statusCode == 201) {
+        thought.savedDateTime = DateTime.now();
         return true;
       } else {
         return false;

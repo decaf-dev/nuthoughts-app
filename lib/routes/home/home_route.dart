@@ -1,6 +1,6 @@
 import 'package:chisel_notes/constants.dart';
 import 'package:chisel_notes/controllers/app_controller.dart';
-import 'package:chisel_notes/routes/saved_blocks/saved_blocks_route.dart';
+import 'package:chisel_notes/routes/recent_thoughts/recent_thoughts.dart';
 import 'package:chisel_notes/routes/settings/settings_route.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -53,7 +53,7 @@ class _HomeRouteState extends State<HomeRoute> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const SavedBlocksRoute()),
+                        builder: (context) => const RecentThoughtsRoute()),
                   );
                 }),
             IconButton(
@@ -70,47 +70,75 @@ class _HomeRouteState extends State<HomeRoute> {
                 }),
           ],
         ),
-        body: SingleChildScrollView(
-          child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
-              child: Obx(
-                () => TextField(
-                    controller: textFieldController,
-                    onChanged: (value) {
-                      controller.setText(value);
-                    },
-                    autofocus: true,
-                    enabled: controller.isLoading.value != true,
-                    decoration: const InputDecoration(border: InputBorder.none),
-                    keyboardType: TextInputType.multiline,
-                    minLines: 10,
-                    maxLines: null),
-                // if (controller.isLoading.value == false) ...[
-                //   MaterialButton(
-                //     color: Colors.blue,
-                //     textColor: Colors.white,
-                //     onPressed: () async {
-                //       String text = textFieldController.text;
-                //       if (text.isNotEmpty) {
-                //         FocusManager.instance.primaryFocus?.unfocus();
-                //         bool success = await controller
-                //             .saveText(textFieldController.text);
-                //         if (success) {
-                //           textFieldController.clear();
-                //           controller.setText("");
-                //         } else {
-                //           Fluttertoast.showToast(
-                //             msg: 'An error occurred while submitting data.',
-                //             backgroundColor: Colors.red,
-                //             textColor: Colors.white,
-                //           );
-                //         }
-                //       }
-                //     },
-                //     child: const Text("Save"),
-                //   )
-                // ]
-              )),
+        body: Column(children: [
+          _lastSynced(),
+          const SizedBox(height: 10),
+          Expanded(
+              child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 60),
+                  child: SingleChildScrollView(
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          TextField(
+                              controller: textFieldController,
+                              onChanged: (value) {
+                                controller.setText(value);
+                              },
+                              autofocus: true,
+                              enabled: controller.isLoading.value != true,
+                              decoration: const InputDecoration(
+                                  border: InputBorder.none),
+                              keyboardType: TextInputType.multiline,
+                              minLines: 10,
+                              maxLines: null)
+                        ]),
+                  )))
+        ]),
+        floatingActionButton: FloatingActionButton.extended(
+          icon: const Icon(Icons.add),
+          backgroundColor: Colors.deepPurple,
+          foregroundColor: Colors.white,
+          label: const Text('New Thought'),
+          onPressed: () async {
+            String text = textFieldController.text;
+            if (text.isNotEmpty) {
+              controller.saveThought(text);
+              textFieldController.clear();
+              controller.setText("");
+            }
+          },
         ));
+    // bottomSheet: ((MediaQuery.of(context).viewInsets.bottom != 0
+    //     ? Container(
+    //         padding:
+    //             const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+    //         child: Row(
+    //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    //           children: [
+    //             FloatingActionButton.extended(
+    //               icon: const Icon(Icons.add),
+    //               backgroundColor: Colors.deepPurple,
+    //               foregroundColor: Colors.white,
+    //               label: const Text('New Thought'),
+    //               onPressed: () => {},
+    //             ),
+    //           ],
+    //         ),
+    //       )
+    //     : const SizedBox())));
+  }
+
+  Widget _lastSynced() {
+    return (Container(
+        color: Colors.deepPurple,
+        padding: const EdgeInsets.all(10),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Text("Last synced ${controller.syncTime.getSyncTime()} ago",
+                style: const TextStyle(color: Colors.white))
+          ],
+        )));
   }
 }
