@@ -2,7 +2,7 @@ class Thought {
   final int id;
   final DateTime creationDateTime;
   final String text;
-  DateTime? savedDateTime;
+  DateTime? serverSaveDateTime;
 
   Thought(
       {required this.id, required this.creationDateTime, required this.text});
@@ -12,7 +12,7 @@ class Thought {
       'id': id,
       'createDateTime': creationDateTime,
       'text': text,
-      'savedDateTime': savedDateTime
+      'serverSaveDateTime': serverSaveDateTime
     };
   }
 
@@ -23,12 +23,16 @@ class Thought {
     };
   }
 
-  bool hasBeenSaved() {
-    return savedDateTime != null;
+  bool hasBeenSavedOnServer() {
+    return serverSaveDateTime != null;
+  }
+
+  void updateServerSaveTime() {
+    serverSaveDateTime = DateTime.now();
   }
 
   @override
   String toString() {
-    return 'Thought{id: $id, creationDateTime: $creationDateTime, text: $text, savedDateTime: $savedDateTime}';
+    return 'Thought{id: $id, creationDateTime: $creationDateTime, text: $text, serverSaveDateTime: $serverSaveDateTime}';
   }
 }

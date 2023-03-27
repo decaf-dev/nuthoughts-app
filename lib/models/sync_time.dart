@@ -1,9 +1,22 @@
 import "package:get/get.dart";
 
 class SyncTime {
-  void update() {}
+  Rx<int> time = 0.obs;
 
-  String getSyncTime() {
-    return "5 minutes";
+  void updateSyncTime() {
+    time.value = DateTime.now().millisecondsSinceEpoch;
+  }
+
+  String getSyncTimeString() {
+    if (time.value != 0) {
+      DateTime now = DateTime.now();
+      int diff = now.millisecondsSinceEpoch - time.value;
+      if (diff < 1000 * 60 * 60) {
+        return "${(diff ~/ (1000 * 60))} minutes ago";
+      } else {
+        return "${(diff ~/ (1000 * 60 * 60))} hours ago";
+      }
+    }
+    return "never";
   }
 }

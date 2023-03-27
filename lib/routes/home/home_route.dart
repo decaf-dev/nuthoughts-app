@@ -133,12 +133,12 @@ class _HomeRouteState extends State<HomeRoute> {
     return (Container(
         color: Colors.deepPurple,
         padding: const EdgeInsets.all(10),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Text("Last synced ${controller.syncTime.getSyncTime()} ago",
-                style: const TextStyle(color: Colors.white))
-          ],
-        )));
+        child: Obx(() => Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text("Last synced: ${controller.syncTime.getSyncTimeString()}",
+                    style: const TextStyle(color: Colors.white))
+              ],
+            ))));
   }
 }

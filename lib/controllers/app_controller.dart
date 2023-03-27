@@ -43,7 +43,7 @@ class AppController extends GetxController {
         body: jsonEncode(thought.toJson()),
       );
       if (response.statusCode == 201) {
-        thought.savedDateTime = DateTime.now();
+        thought.updateServerSaveTime();
         return true;
       } else {
         return false;
