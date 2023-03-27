@@ -1,7 +1,7 @@
-import 'package:chisel_notes/constants.dart';
-import 'package:chisel_notes/controllers/app_controller.dart';
-import 'package:chisel_notes/routes/recent_thoughts/recent_thoughts.dart';
-import 'package:chisel_notes/routes/settings/settings_route.dart';
+import 'package:nuthoughts/constants.dart';
+import 'package:nuthoughts/controllers/app_controller.dart';
+import 'package:nuthoughts/routes/recent_thoughts/recent_thoughts.dart';
+import 'package:nuthoughts/routes/settings/settings_route.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';

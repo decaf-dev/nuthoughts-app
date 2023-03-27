@@ -1,4 +1,4 @@
-package com.example.chisel_notes
+package com.example.nuthoughts
 
 import io.flutter.embedding.android.FlutterActivity
 
