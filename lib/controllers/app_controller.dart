@@ -20,7 +20,16 @@ class AppController extends GetxController {
     final prefs = await SharedPreferences.getInstance();
     ipAddress.value = prefs.getString(Constants.ipAddressKey) ?? 'localhost';
     port.value = prefs.getString(Constants.portKey) ?? '9005';
-    recentThoughts.value = await PersistedData.listThoughts();
+
+    //Prune thoughts that are over 1 day old
+    List<Thought> thoughts = await PersistedData.listThoughts();
+    for (Thought thought in thoughts) {
+      if (thought.shouldDelete()) {
+        await PersistedData.deleteThought(thought.id);
+        thoughts.removeWhere((el) => el.id == thought.id);
+      }
+    }
+    recentThoughts.value = thoughts;
     super.onInit();
   }
 

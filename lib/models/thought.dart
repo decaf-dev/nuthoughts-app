@@ -22,6 +22,13 @@ class Thought {
     };
   }
 
+  //If the thought is older than 1 day and it is has been saved, then delete it from the list
+  bool shouldDelete() {
+    return DateTime.now().millisecondsSinceEpoch - creationTime >
+            1000 * 60 * 60 * 24 &&
+        hasBeenSavedOnServer();
+  }
+
   bool hasBeenSavedOnServer() {
     return serverSaveTime != -1;
   }
