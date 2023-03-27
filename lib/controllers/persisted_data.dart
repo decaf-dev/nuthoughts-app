@@ -11,7 +11,7 @@ class PersistedData {
       join(await getDatabasesPath(), 'recent_thoughts.db'),
       onCreate: (db, version) {
         return db.execute(
-          'CREATE TABLE thoughts(id INTEGER PRIMARY KEY AUTO_INCREMENT, text TEXT, creationTime INTEGER, serverSaveTime INTEGER)',
+          'CREATE TABLE thoughts(id INTEGER PRIMARY KEY AUTOINCREMENT, text TEXT, creationTime INTEGER, serverSaveTime INTEGER)',
         );
       },
       version: 1,
