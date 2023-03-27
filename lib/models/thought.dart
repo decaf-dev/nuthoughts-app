@@ -1,18 +1,18 @@
 class Thought {
-  final int id;
+  //Will be assigned from the id returned from the PersistedData.insertThought function
+  int? id;
   final int creationTime;
   final String text;
   int serverSaveTime;
 
   Thought(
-      {required this.id,
-      required this.creationTime,
+      {required this.creationTime,
       required this.text,
+      this.id,
       this.serverSaveTime = -1});
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
       'creationTime': creationTime,
       'text': text,
       'serverSaveTime': serverSaveTime

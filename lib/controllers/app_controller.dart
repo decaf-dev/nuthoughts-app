@@ -25,7 +25,7 @@ class AppController extends GetxController {
     List<Thought> thoughts = await PersistedData.listThoughts();
     for (Thought thought in thoughts) {
       if (thought.shouldDelete()) {
-        await PersistedData.deleteThought(thought.id);
+        await PersistedData.deleteThought(thought.id!);
         thoughts.removeWhere((el) => el.id == thought.id);
       }
     }
@@ -33,17 +33,12 @@ class AppController extends GetxController {
     super.onInit();
   }
 
-  int _getNextBlockId() {
-    return recentThoughts.length + 1;
-  }
-
   void saveThought(String text) async {
     Thought thought = Thought(
-        id: _getNextBlockId(),
-        creationTime: DateTime.now().millisecondsSinceEpoch,
-        text: text);
+        creationTime: DateTime.now().millisecondsSinceEpoch, text: text);
     recentThoughts.add(thought);
-    PersistedData.insertThought(thought);
+    int id = await PersistedData.insertThought(thought);
+    thought.id = id;
     await _thoughtPost(thought);
   }
 

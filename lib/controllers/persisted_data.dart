@@ -11,18 +11,18 @@ class PersistedData {
       join(await getDatabasesPath(), 'recent_thoughts.db'),
       onCreate: (db, version) {
         return db.execute(
-          'CREATE TABLE thoughts(id INTEGER PRIMARY KEY, text TEXT, creationTime INTEGER, serverSaveTime INTEGER)',
+          'CREATE TABLE thoughts(id INTEGER PRIMARY KEY AUTO_INCREMENT, text TEXT, creationTime INTEGER, serverSaveTime INTEGER)',
         );
       },
       version: 1,
     );
   }
 
-  static Future<void> insertThought(Thought thought) async {
+  static Future<int> insertThought(Thought thought) async {
     if (database == null) {
       throw Exception("Cannot insert thought. Database is not open.");
     }
-    await database!.insert(
+    return await database!.insert(
       'thoughts',
       thought.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
