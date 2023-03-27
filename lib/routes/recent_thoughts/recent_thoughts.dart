@@ -21,27 +21,30 @@ class _RecentThoughtsRouteState extends State<RecentThoughtsRoute> {
       ),
       body: Center(
           child: Padding(
-        padding: const EdgeInsets.all(25),
-        child: ListView.builder(
-          itemCount: controller.recentThoughts.length,
-          itemBuilder: (context, index) {
-            Thought thought =
-                controller.recentThoughts.reversed.toList()[index];
-            return Card(
-                margin: const EdgeInsets.symmetric(vertical: 10),
-                child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(thought.text),
-                          if (!thought.hasBeenSavedOnServer()) ...[
-                            const Icon(Icons.sync_problem, color: Colors.red)
-                          ]
-                        ])));
-          },
-        ),
-      )),
+              padding: const EdgeInsets.all(25),
+              child: Obx(
+                () => ListView.builder(
+                  itemCount: controller.recentThoughts.length,
+                  itemBuilder: (context, index) {
+                    Thought thought =
+                        controller.recentThoughts.reversed.toList()[index];
+                    return Card(
+                        margin: const EdgeInsets.symmetric(vertical: 10),
+                        child: Padding(
+                            padding: const EdgeInsets.all(20),
+                            child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(thought.text),
+                                  if (!thought.hasBeenSavedOnServer()) ...[
+                                    const Icon(Icons.sync_problem,
+                                        color: Colors.red)
+                                  ]
+                                ])));
+                  },
+                ),
+              ))),
     );
   }
 }
