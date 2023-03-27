@@ -38,8 +38,13 @@ class _RecentThoughtsRouteState extends State<RecentThoughtsRoute> {
                                   Text(thought.text,
                                       style: const TextStyle(height: 1.3)),
                                   if (!thought.hasBeenSavedOnServer()) ...[
-                                    const Icon(Icons.sync_problem,
-                                        color: Colors.red)
+                                    Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: const [
+                                          Icon(Icons.sync_problem,
+                                              color: Colors.red)
+                                        ])
                                   ]
                                 ])));
                   },
