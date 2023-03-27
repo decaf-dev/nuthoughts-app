@@ -32,13 +32,11 @@ class _RecentThoughtsRouteState extends State<RecentThoughtsRoute> {
                         margin: const EdgeInsets.symmetric(vertical: 10),
                         child: Padding(
                             padding: const EdgeInsets.all(20),
-                            child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                            child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Flexible(
-                                      child: Text(thought.text,
-                                          style: const TextStyle(height: 1.3))),
+                                  Text(thought.text,
+                                      style: const TextStyle(height: 1.3)),
                                   if (!thought.hasBeenSavedOnServer()) ...[
                                     const Icon(Icons.sync_problem,
                                         color: Colors.red)
