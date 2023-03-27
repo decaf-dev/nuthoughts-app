@@ -44,7 +44,6 @@ class AppController extends GetxController {
 
   Future<bool> _thoughtPost(Thought thought) async {
     try {
-      syncTime.updateSyncTime();
       final response = await http
           .post(
             Uri.parse('http://${ipAddress.value}:${port.value}/thought'),
@@ -55,6 +54,7 @@ class AppController extends GetxController {
           )
           .timeout(const Duration(seconds: 10));
       if (response.statusCode == 201) {
+        syncTime.updateSyncTime();
         thought.updateServerSaveTime();
         await PersistedData.updateThought(thought);
         await _syncUnsavedThoughts();
