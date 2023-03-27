@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:nuthoughts/constants.dart';
@@ -15,6 +16,8 @@ class AppController extends GetxController {
   final ipAddress = ''.obs;
   final port = ''.obs;
 
+  Timer? _timer;
+
   @override
   void onInit() async {
     final prefs = await SharedPreferences.getInstance();
@@ -31,6 +34,22 @@ class AppController extends GetxController {
     }
     recentThoughts.value = thoughts;
     super.onInit();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  //Every minute sync unsaved thoughts
+  void startSyncTimer() {
+    _timer = Timer.periodic(
+      const Duration(minutes: 1),
+      (Timer timer) {
+        _syncUnsavedThoughts();
+      },
+    );
   }
 
   void saveThought(String text) async {
