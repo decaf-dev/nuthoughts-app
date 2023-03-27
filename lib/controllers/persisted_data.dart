@@ -35,7 +35,7 @@ class PersistedData {
     }
     // Update the given Dog.
     await database!.update(
-      'thought',
+      'thoughts',
       thought.toMap(),
       where: 'id = ?',
       // Pass the Dog's id as a whereArg to prevent SQL injection.
