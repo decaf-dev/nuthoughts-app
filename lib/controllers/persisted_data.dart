@@ -29,6 +29,20 @@ class PersistedData {
     );
   }
 
+  static Future<void> updateThought(Thought thought) async {
+    if (database == null) {
+      throw Exception("Cannot update thought. Database is not open.");
+    }
+    // Update the given Dog.
+    await database!.update(
+      'thought',
+      thought.toMap(),
+      where: 'id = ?',
+      // Pass the Dog's id as a whereArg to prevent SQL injection.
+      whereArgs: [thought.id],
+    );
+  }
+
   // A method that retrieves all the dogs from the dogs table.
   static Future<List<Thought>> listThoughts() async {
     if (database == null) {
