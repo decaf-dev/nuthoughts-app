@@ -3,7 +3,6 @@ import 'package:chisel_notes/controllers/app_controller.dart';
 import 'package:chisel_notes/routes/saved_blocks/saved_blocks_route.dart';
 import 'package:chisel_notes/routes/settings/settings_route.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -71,70 +70,47 @@ class _HomeRouteState extends State<HomeRoute> {
                 }),
           ],
         ),
-        body: Center(
-            child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
-          child: Obx(() => Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  TextField(
-                      controller: textFieldController,
-                      onChanged: (value) {
-                        controller.setText(value);
-                      },
-                      autofocus: true,
-                      enabled: controller.isLoading.value != true,
-                      style: TextStyle(
-                          color: controller.isLoading.value
-                              ? Colors.grey
-                              : Colors.black),
-                      decoration: InputDecoration(
-                          focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10.0),
-                              borderSide:
-                                  const BorderSide(color: Colors.green)),
-                          enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10.0),
-                              borderSide:
-                                  const BorderSide(color: Colors.green)),
-                          disabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10.0),
-                              borderSide: const BorderSide(color: Colors.grey)),
-                          hintText: "What are you thinking...?"),
-                      keyboardType: TextInputType.multiline,
-                      minLines: 10,
-                      maxLines: null),
-                  const SizedBox(height: 20),
-                  if (controller.isLoading.value == true) ...[
-                    const CircularProgressIndicator(color: Colors.blue)
-                  ],
-                  if (controller.isLoading.value == false) ...[
-                    MaterialButton(
-                      color: Colors.blue,
-                      textColor: Colors.white,
-                      onPressed: () async {
-                        String text = textFieldController.text;
-                        if (text.isNotEmpty) {
-                          FocusManager.instance.primaryFocus?.unfocus();
-                          bool success = await controller
-                              .saveText(textFieldController.text);
-                          if (success) {
-                            textFieldController.clear();
-                            controller.setText("");
-                          } else {
-                            Fluttertoast.showToast(
-                              msg: 'An error occurred while submitting data.',
-                              backgroundColor: Colors.red,
-                              textColor: Colors.white,
-                            );
-                          }
-                        }
-                      },
-                      child: const Text("Save"),
-                    )
-                  ]
-                ],
+        body: SingleChildScrollView(
+          child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+              child: Obx(
+                () => TextField(
+                    controller: textFieldController,
+                    onChanged: (value) {
+                      controller.setText(value);
+                    },
+                    autofocus: true,
+                    enabled: controller.isLoading.value != true,
+                    decoration: const InputDecoration(border: InputBorder.none),
+                    keyboardType: TextInputType.multiline,
+                    minLines: 10,
+                    maxLines: null),
+                // if (controller.isLoading.value == false) ...[
+                //   MaterialButton(
+                //     color: Colors.blue,
+                //     textColor: Colors.white,
+                //     onPressed: () async {
+                //       String text = textFieldController.text;
+                //       if (text.isNotEmpty) {
+                //         FocusManager.instance.primaryFocus?.unfocus();
+                //         bool success = await controller
+                //             .saveText(textFieldController.text);
+                //         if (success) {
+                //           textFieldController.clear();
+                //           controller.setText("");
+                //         } else {
+                //           Fluttertoast.showToast(
+                //             msg: 'An error occurred while submitting data.',
+                //             backgroundColor: Colors.red,
+                //             textColor: Colors.white,
+                //           );
+                //         }
+                //       }
+                //     },
+                //     child: const Text("Save"),
+                //   )
+                // ]
               )),
-        )));
+        ));
   }
 }
