@@ -61,7 +61,7 @@ class AppController extends GetxController {
           .timeout(const Duration(seconds: 10));
       if (response.statusCode == 201) {
         thought.updateServerSaveTime();
-        PersistedData.updateThought(thought);
+        await PersistedData.updateThought(thought);
         await _syncUnsavedThoughts();
         return true;
       } else {

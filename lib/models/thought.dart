@@ -2,9 +2,13 @@ class Thought {
   final int id;
   final int creationTime;
   final String text;
-  int serverSaveTime = -1;
+  int serverSaveTime;
 
-  Thought({required this.id, required this.creationTime, required this.text});
+  Thought(
+      {required this.id,
+      required this.creationTime,
+      required this.text,
+      this.serverSaveTime = -1});
 
   Map<String, dynamic> toMap() {
     return {

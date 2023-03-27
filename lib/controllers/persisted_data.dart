@@ -53,10 +53,10 @@ class PersistedData {
     // Convert the List<Map<String, dynamic> into a List<Dog>.
     return List.generate(maps.length, (i) {
       return Thought(
-        id: maps[i]['id'],
-        creationTime: maps[i]['creationTime'],
-        text: maps[i]['text'],
-      );
+          id: maps[i]['id'],
+          text: maps[i]['text'],
+          creationTime: maps[i]['creationTime'],
+          serverSaveTime: maps[i]['serverSaveTime']);
     });
   }
 
