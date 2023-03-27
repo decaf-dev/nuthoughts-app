@@ -1,22 +1,36 @@
 import "package:get/get.dart";
 
 class SyncTime {
-  Rx<int> time = 0.obs;
+  final _minute = 1000 * 60;
+  final _hour = 1000 * 60 * 60;
+  final _day = 1000 * 60 * 60 * 24;
+
+  final _lastSyncTime = 0.obs;
+  final syncString = 'never'.obs;
 
   void updateSyncTime() {
-    time.value = DateTime.now().millisecondsSinceEpoch;
+    _lastSyncTime.value = DateTime.now().millisecondsSinceEpoch;
   }
 
-  String getSyncTimeString() {
-    if (time.value != 0) {
+  void refreshSyncDisplay() {
+    String value = "never";
+    if (_lastSyncTime.value != 0) {
       DateTime now = DateTime.now();
-      int diff = now.millisecondsSinceEpoch - time.value;
-      if (diff < 1000 * 60 * 60) {
-        return "${(diff ~/ (1000 * 60))} minutes ago";
-      } else {
-        return "${(diff ~/ (1000 * 60 * 60))} hours ago";
+      int diff = now.millisecondsSinceEpoch - _lastSyncTime.value;
+      if (diff < _minute) {
+        value = "just now";
+      } else if (diff < 2 * _minute) {
+        value = "1 minute ago";
+      } else if (diff < 5 * _minute) {
+        value = "${(diff ~/ (_minute))} minutes ago";
+      } else if (diff < _hour) {
+        value = "${(diff ~/ (_minute * 5))} minutes ago";
+      } else if (diff < _day) {
+        value = "${(diff ~/ _hour)} hours ago";
+      } else if (diff >= _day) {
+        value = "${(diff ~/ _day)} days ago";
       }
     }
-    return "never";
+    syncString.value = value;
   }
 }
