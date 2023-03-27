@@ -85,6 +85,7 @@ class _HomeRouteState extends State<HomeRoute> {
                               onChanged: (value) {
                                 controller.setText(value);
                               },
+                              style: const TextStyle(height: 1.3),
                               autofocus: true,
                               enabled: controller.isLoading.value != true,
                               decoration: const InputDecoration(

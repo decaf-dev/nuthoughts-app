@@ -36,7 +36,9 @@ class _RecentThoughtsRouteState extends State<RecentThoughtsRoute> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Flexible(child: Text(thought.text)),
+                                  Flexible(
+                                      child: Text(thought.text,
+                                          style: const TextStyle(height: 1.3))),
                                   if (!thought.hasBeenSavedOnServer()) ...[
                                     const Icon(Icons.sync_problem,
                                         color: Colors.red)
