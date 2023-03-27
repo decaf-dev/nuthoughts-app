@@ -1,38 +1,37 @@
 class Thought {
   final int id;
-  final DateTime creationDateTime;
+  final int creationTime;
   final String text;
-  DateTime? serverSaveDateTime;
+  int serverSaveTime = -1;
 
-  Thought(
-      {required this.id, required this.creationDateTime, required this.text});
+  Thought({required this.id, required this.creationTime, required this.text});
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'createDateTime': creationDateTime,
+      'creationTime': creationTime,
       'text': text,
-      'serverSaveDateTime': serverSaveDateTime
+      'serverSaveTime': serverSaveTime
     };
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'creationTime': creationDateTime.millisecondsSinceEpoch,
+      'creationTime': creationTime,
       'text': text,
     };
   }
 
   bool hasBeenSavedOnServer() {
-    return serverSaveDateTime != null;
+    return serverSaveTime != -1;
   }
 
   void updateServerSaveTime() {
-    serverSaveDateTime = DateTime.now();
+    serverSaveTime = DateTime.now().microsecondsSinceEpoch;
   }
 
   @override
   String toString() {
-    return 'Thought{id: $id, creationDateTime: $creationDateTime, text: $text, serverSaveDateTime: $serverSaveDateTime}';
+    return 'Thought{id: $id, creationTime: $creationTime, text: $text, serverSaveTime: $serverSaveTime}';
   }
 }

@@ -1,10 +1,12 @@
 import 'package:nuthoughts/controllers/app_controller.dart';
+import 'package:nuthoughts/controllers/persisted_data.dart';
 import 'package:nuthoughts/routes/home/home_route.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await PersistedData.openDatabases();
   Get.put(AppController());
   runApp(const MyApp());
 }

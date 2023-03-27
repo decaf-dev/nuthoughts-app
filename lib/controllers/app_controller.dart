@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:nuthoughts/constants.dart';
+import 'package:nuthoughts/controllers/persisted_data.dart';
 import 'package:nuthoughts/models/thought.dart';
 import 'package:nuthoughts/models/sync_time.dart';
 import 'package:get/get.dart';
@@ -8,7 +9,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppController extends GetxController {
-  final recentThoughts = <Thought>[];
+  final recentThoughts = <Thought>[].obs;
   final syncTime = SyncTime();
   final isLoading = false.obs;
   final ipAddress = ''.obs;
@@ -19,6 +20,7 @@ class AppController extends GetxController {
     final prefs = await SharedPreferences.getInstance();
     ipAddress.value = prefs.getString(Constants.ipAddressKey) ?? 'localhost';
     port.value = prefs.getString(Constants.portKey) ?? '9005';
+    recentThoughts.value = await PersistedData.listThoughts();
     super.onInit();
   }
 
@@ -28,8 +30,11 @@ class AppController extends GetxController {
 
   void saveThought(String text) async {
     Thought thought = Thought(
-        id: _getNextBlockId(), creationDateTime: DateTime.now(), text: text);
+        id: _getNextBlockId(),
+        creationTime: DateTime.now().millisecondsSinceEpoch,
+        text: text);
     recentThoughts.add(thought);
+    PersistedData.insertThought(thought);
     await _thoughtPost(thought);
   }
 

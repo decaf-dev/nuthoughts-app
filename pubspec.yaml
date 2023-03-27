@@ -39,6 +39,8 @@ dependencies:
   fluttertoast: ^8.2.1
   settings_ui: ^2.0.2
   shared_preferences: ^2.0.20
+  sqflite: ^2.2.6
+  path: ^1.8.2
 
 dev_dependencies:
   flutter_test:
