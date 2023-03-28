@@ -15,14 +15,16 @@ class AppController extends GetxController {
   final ipAddress = ''.obs;
   final port = ''.obs;
 
-  Timer? _timer;
+  Timer? _reconnectionTimer;
 
   @override
   void onInit() async {
+    //Deserialize preferences
     final prefs = await SharedPreferences.getInstance();
     ipAddress.value = prefs.getString(Constants.ipAddressKey) ?? 'localhost';
     port.value = prefs.getString(Constants.portKey) ?? '9005';
 
+    //Deserialize thoughts
     //Prune thoughts that are over 1 day old
     List<Thought> thoughts = await PersistedData.listThoughts();
     for (Thought thought in thoughts) {
@@ -32,27 +34,34 @@ class AppController extends GetxController {
       }
     }
     recentThoughts.value = thoughts;
-    startSyncTimer();
+
+    //Start the timer to update the sync time string
+    syncTime.restartTimer();
+
+    //Attempt to sync thoughts on start up
+    bool success = await _syncUnsavedThoughts();
+    if (!success) {
+      restartReconnectionTimer();
+    }
+    //Start disconnection timer
     super.onInit();
+  }
+
+  void restartReconnectionTimer() {
+    _reconnectionTimer?.cancel();
+    _reconnectionTimer = Timer.periodic(
+      const Duration(minutes: 1),
+      (Timer timer) async {
+        await _syncUnsavedThoughts();
+      },
+    );
   }
 
   @override
   void dispose() {
-    _timer?.cancel();
+    syncTime.dispose();
+    _reconnectionTimer?.cancel();
     super.dispose();
-  }
-
-  //Every minute sync unsaved thoughts
-  void startSyncTimer() async {
-    await _syncUnsavedThoughts();
-    syncTime.refreshSyncDisplay();
-    _timer = Timer.periodic(
-      const Duration(minutes: 1),
-      (Timer timer) async {
-        await _syncUnsavedThoughts();
-        syncTime.refreshSyncDisplay();
-      },
-    );
   }
 
   void saveThought(String text) async {
@@ -61,7 +70,12 @@ class AppController extends GetxController {
     recentThoughts.add(thought);
     int id = await PersistedData.insertThought(thought);
     thought.id = id;
-    await _thoughtPost(thought);
+    bool wasSuccessful = await _thoughtPost(thought);
+    if (wasSuccessful) {
+      syncTime.updateSyncTime();
+    } else {
+      restartReconnectionTimer();
+    }
   }
 
   Future<bool> _thoughtPost(Thought thought) async {
@@ -76,10 +90,8 @@ class AppController extends GetxController {
           )
           .timeout(const Duration(seconds: 10));
       if (response.statusCode == 201) {
-        syncTime.updateSyncTime();
         thought.updateServerSaveTime();
         await PersistedData.updateThought(thought);
-        await _syncUnsavedThoughts();
         return true;
       } else {
         return false;
@@ -89,12 +101,24 @@ class AppController extends GetxController {
     }
   }
 
-  Future<void> _syncUnsavedThoughts() async {
-    for (Thought thought in recentThoughts) {
-      if (!thought.hasBeenSavedOnServer()) {
-        await _thoughtPost(thought);
+  Future<bool> _syncUnsavedThoughts() async {
+    List<Thought> thoughtsToSave = recentThoughts
+        .where((thought) => !thought.hasBeenSavedOnServer())
+        .toList();
+    if (thoughtsToSave.isNotEmpty) {
+      var result = await Future.wait(
+          thoughtsToSave.map((thought) => _thoughtPost(thought)));
+      if (result.every((val) => val == true)) {
+        //Cancel reconnection timer
+        _reconnectionTimer?.cancel();
+        //If all the thoughts were successful
+        //then update the time and the display string
+        syncTime.updateSyncTime();
+        return true;
       }
+      return false;
     }
+    return true;
   }
 
   void setIpAddress(String value) async {

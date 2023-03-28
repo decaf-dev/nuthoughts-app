@@ -136,7 +136,7 @@ class _HomeRouteState extends State<HomeRoute> {
         child: Obx(() => Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Text("Last synced: ${controller.syncTime.syncString}",
+                Text("Last sync: ${controller.syncTime.syncString}",
                     style: const TextStyle(color: Colors.white))
               ],
             ))));

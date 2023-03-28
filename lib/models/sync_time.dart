@@ -1,3 +1,5 @@
+import "dart:async";
+
 import "package:get/get.dart";
 
 class SyncTime {
@@ -7,12 +9,33 @@ class SyncTime {
 
   final _lastSyncTime = 0.obs;
   final syncString = 'never'.obs;
+  Timer? _timer;
 
   void updateSyncTime() {
     _lastSyncTime.value = DateTime.now().millisecondsSinceEpoch;
+    restartTimer();
   }
 
-  void refreshSyncDisplay() {
+  void restartTimer() {
+    _refreshSyncDisplay();
+    cancelTimer();
+    _timer = Timer.periodic(
+      const Duration(minutes: 1),
+      (Timer timer) async {
+        _refreshSyncDisplay();
+      },
+    );
+  }
+
+  void cancelTimer() {
+    _timer?.cancel();
+  }
+
+  void dispose() {
+    cancelTimer();
+  }
+
+  void _refreshSyncDisplay() {
     String value = "never";
     if (_lastSyncTime.value != 0) {
       DateTime now = DateTime.now();
