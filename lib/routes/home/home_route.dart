@@ -87,7 +87,6 @@ class _HomeRouteState extends State<HomeRoute> {
                               },
                               style: const TextStyle(height: 1.3),
                               autofocus: true,
-                              enabled: controller.isLoading.value != true,
                               decoration: const InputDecoration(
                                   border: InputBorder.none),
                               keyboardType: TextInputType.multiline,
@@ -137,7 +136,7 @@ class _HomeRouteState extends State<HomeRoute> {
         child: Obx(() => Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Text("Last synced: ${controller.syncTime.getSyncTimeString()}",
+                Text("Last synced: ${controller.syncTime.syncString}",
                     style: const TextStyle(color: Colors.white))
               ],
             ))));
