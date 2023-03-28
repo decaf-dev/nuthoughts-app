@@ -12,7 +12,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 class AppController extends GetxController {
   final recentThoughts = <Thought>[].obs;
   final syncTime = SyncTime();
-  final isLoading = false.obs;
   final ipAddress = ''.obs;
   final port = ''.obs;
 
@@ -33,6 +32,7 @@ class AppController extends GetxController {
       }
     }
     recentThoughts.value = thoughts;
+    startSyncTimer();
     super.onInit();
   }
 
@@ -43,11 +43,14 @@ class AppController extends GetxController {
   }
 
   //Every minute sync unsaved thoughts
-  void startSyncTimer() {
+  void startSyncTimer() async {
+    await _syncUnsavedThoughts();
+    syncTime.refreshSyncDisplay();
     _timer = Timer.periodic(
       const Duration(minutes: 1),
-      (Timer timer) {
-        _syncUnsavedThoughts();
+      (Timer timer) async {
+        await _syncUnsavedThoughts();
+        syncTime.refreshSyncDisplay();
       },
     );
   }
