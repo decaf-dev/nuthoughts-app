@@ -47,12 +47,33 @@ class _SettingsRouteState extends State<SettingsRoute> {
                 SettingsTile.navigation(
                   leading: const Icon(Icons.key),
                   title: const Text('Encryption Key'),
-                  value: Text(controller.encryptionKeyText ?? ""),
+                  value: const Text("Tap to view"),
+                  onPressed: (BuildContext context) {
+                    _showEncryptionKeyDialog();
+                  },
                 ),
               ])
             ],
           ),
         ));
+  }
+
+  void _showEncryptionKeyDialog() {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text("Encryption Key"),
+            content: Text(controller.encryptionKeyText ?? ""),
+            actions: <Widget>[
+              TextButton(
+                  onPressed: () {
+                    _dismissDialog();
+                  },
+                  child: const Text('Close'))
+            ],
+          );
+        });
   }
 
   void _showSettingDialog(String title, Function(String value) onSave) {
