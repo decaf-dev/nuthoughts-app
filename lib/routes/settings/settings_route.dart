@@ -43,6 +43,13 @@ class _SettingsRouteState extends State<SettingsRoute> {
                   ),
                 ],
               ),
+              SettingsSection(title: const Text("Encryption"), tiles: [
+                SettingsTile.navigation(
+                  leading: const Icon(Icons.key),
+                  title: const Text('Encryption Key'),
+                  value: Text(controller.encryptionKeyText ?? ""),
+                ),
+              ])
             ],
           ),
         ));

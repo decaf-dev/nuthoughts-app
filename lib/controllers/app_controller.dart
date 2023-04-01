@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:cryptography/cryptography.dart';
+import 'package:hex/hex.dart';
 import 'package:nuthoughts/constants.dart';
 import 'package:nuthoughts/controllers/persisted_data.dart';
 import 'package:nuthoughts/models/thought.dart';
@@ -14,6 +16,8 @@ class AppController extends GetxController {
   final syncTime = SyncTime();
   final ipAddress = ''.obs;
   final port = ''.obs;
+  SecretKey? encryptionKey;
+  String? encryptionKeyText;
 
   Timer? _reconnectionTimer;
 
@@ -23,6 +27,17 @@ class AppController extends GetxController {
     final prefs = await SharedPreferences.getInstance();
     ipAddress.value = prefs.getString(Constants.ipAddressKey) ?? 'localhost';
     port.value = prefs.getString(Constants.portKey) ?? '9005';
+
+    String? key = prefs.getString(Constants.encryptionKey);
+    if (key != null) {
+      encryptionKeyText = key;
+      encryptionKey = await deserializeSecretKey(key);
+    } else {
+      encryptionKey = await createSecretKey();
+      String serializedKey = await serializeSecretKey(encryptionKey!);
+      encryptionKeyText = serializedKey;
+      setEncryptionKey(serializedKey);
+    }
 
     //Deserialize thoughts
     //Prune thoughts that are over 1 day old
@@ -80,14 +95,13 @@ class AppController extends GetxController {
 
   Future<bool> _thoughtPost(Thought thought) async {
     try {
+      String encryptedThought = await encryptThought(thought);
       final response = await http
-          .post(
-            Uri.parse('http://${ipAddress.value}:${port.value}/thought'),
-            headers: <String, String>{
-              'Content-Type': 'application/json; charset=UTF-8',
-            },
-            body: jsonEncode(thought.toJson()),
-          )
+          .post(Uri.parse('http://${ipAddress.value}:${port.value}/thought'),
+              headers: <String, String>{
+                'Content-Type': 'application/json; charset=UTF-8',
+              },
+              body: encryptedThought)
           .timeout(const Duration(seconds: 10));
       if (response.statusCode == 201) {
         thought.updateServerSaveTime();
@@ -99,6 +113,47 @@ class AppController extends GetxController {
     } catch (err) {
       return false;
     }
+  }
+
+  Future<SecretKey> deserializeSecretKey(String key) async {
+    List<int> keyBuffer = base64Url.decode(key);
+    final algorithm = Chacha20.poly1305Aead();
+    final secretKey = await algorithm.newSecretKeyFromBytes(keyBuffer);
+    return secretKey;
+  }
+
+  Future<String> serializeSecretKey(SecretKey key) async {
+    List<int> keyBuffer = await key.extractBytes();
+    return base64Url.encode(keyBuffer);
+  }
+
+  Future<SecretKey> createSecretKey() async {
+    final algorithm = Chacha20.poly1305Aead();
+    final secretKey = await algorithm.newSecretKey();
+    return secretKey;
+  }
+
+  Future<String> encryptThought(Thought thought) async {
+    //Export the thought to json and then encode it as a string
+    String text = jsonEncode(thought.toJson());
+
+    //Get the text as raw bytes and the key as raw bytes
+    List<int> textBuffer = utf8.encode(text);
+
+    final algorithm = Chacha20.poly1305Aead();
+
+    //Encrypt the thought
+    final secretBox = await algorithm.encrypt(
+      textBuffer,
+      secretKey: encryptionKey!,
+    );
+
+    //Return the encrypted thought as a json string
+    return jsonEncode({
+      'nonce': HEX.encode(secretBox.nonce),
+      'cipherText': HEX.encode(secretBox.cipherText),
+      'mac': HEX.encode(secretBox.mac.bytes)
+    });
   }
 
   Future<bool> _syncUnsavedThoughts() async {
@@ -136,5 +191,10 @@ class AppController extends GetxController {
   void setText(String value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(Constants.textKey, value);
+  }
+
+  void setEncryptionKey(String value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(Constants.encryptionKey, value);
   }
 }
