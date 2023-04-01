@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:nuthoughts/constants.dart';
 import 'package:nuthoughts/controllers/app_controller.dart';
 import 'package:nuthoughts/routes/recent_thoughts/recent_thoughts.dart';
@@ -81,6 +82,9 @@ class _HomeRouteState extends State<HomeRoute> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           TextField(
+                              spellCheckConfiguration: kIsWeb
+                                  ? null
+                                  : const SpellCheckConfiguration(),
                               controller: textFieldController,
                               onChanged: (value) {
                                 controller.setText(value);
