@@ -81,7 +81,7 @@ class AppController extends GetxController {
 
   void saveThought(String text) async {
     Thought thought = Thought(
-        creationTime: DateTime.now().millisecondsSinceEpoch, text: text);
+        creationTime: DateTime.now().millisecondsSinceEpoch, text: text.trim());
     recentThoughts.add(thought);
     int id = await PersistedData.insertThought(thought);
     thought.id = id;
