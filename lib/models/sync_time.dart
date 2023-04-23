@@ -48,6 +48,8 @@ class SyncTime {
         value = "${(diff ~/ (_minute))} minutes ago";
       } else if (diff < _hour) {
         value = "${(diff ~/ (_minute * 5)) * 5} minutes ago";
+      } else if (diff < _hour * 2) {
+        value = "${(diff ~/ _hour)} hour ago";
       } else if (diff < _day) {
         value = "${(diff ~/ _hour)} hours ago";
       } else if (diff >= _day) {
