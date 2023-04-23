@@ -13,7 +13,6 @@ class RecentThoughtsRoute extends StatefulWidget {
 class _RecentThoughtsRouteState extends State<RecentThoughtsRoute> {
   final AppController controller = Get.find();
 
-//TODO refresh all
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -106,6 +106,8 @@ class AppController extends GetxController {
       if (response.statusCode == 201) {
         thought.updateServerSaveTime();
         await PersistedData.updateThought(thought);
+        //Refresh the entire list to update the display string
+        recentThoughts.refresh();
         return true;
       } else {
         return false;
