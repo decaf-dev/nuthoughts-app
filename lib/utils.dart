@@ -1,5 +1,6 @@
+import 'dart:math';
+
 import 'package:nuthoughts/constants.dart';
-import 'package:uuid/uuid.dart';
 
 String getRelativeTimeFromUTCTime(int time) {
   DateTime now = DateTime.now();
@@ -22,4 +23,17 @@ String getRelativeTimeFromUTCTime(int time) {
     value = "${(diff ~/ Constants.millisDay)} days ago";
   }
   return value;
+}
+
+int generateRandomUUID() {
+  Random random = Random.secure();
+  String uuid = '';
+
+  for (int i = 0; i < 32; i++) {
+    int randomNumber =
+        random.nextInt(10); // Generates a random number between 0 and 9
+    uuid += randomNumber.toString();
+  }
+
+  return int.parse(uuid);
 }

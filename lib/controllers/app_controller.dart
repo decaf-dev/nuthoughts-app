@@ -8,6 +8,7 @@ import 'package:nuthoughts/models/thought.dart';
 import 'package:nuthoughts/models/sync_time.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:nuthoughts/utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppController extends GetxController {
@@ -92,12 +93,8 @@ class AppController extends GetxController {
   }
 
   void saveThought(String text) async {
-    //Get num thoughts
-    final List<Thought> thoughts = await SavedData.listThoughts();
-    final int numThoughts = thoughts.length;
-
     //Save the thought
-    final Thought thought = Thought(numThoughts, text.trim());
+    final Thought thought = Thought(generateRandomUUID(), text.trim());
     await SavedData.insertThought(thought);
     recentThoughts.add(thought);
 
