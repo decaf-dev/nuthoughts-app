@@ -64,8 +64,8 @@ class AppController extends GetxController {
   Future<void> _pruneOldThoughts() async {
     List<Thought> thoughts = await SavedData.listThoughts();
     for (Thought thought in thoughts) {
-      int? id = thought.id;
-      if (id != null) {
+      int id = thought.id;
+      if (id != -1) {
         if (thought.shouldDelete()) {
           await SavedData.deleteThought(id);
           thoughts.removeWhere((el) => el.id == id);

@@ -3,10 +3,11 @@ import 'dart:convert';
 import 'package:nuthoughts/constants.dart';
 
 class Thought {
-  int? id;
+  //-1 because sqlite doesn't allow null values
+  int id = -1;
+  int serverSaveTime = -1;
   final String text;
   late int creationTime;
-  int serverSaveTime = -1;
 
   Thought(this.text, {int? creationTime}) {
     if (creationTime != null) {
