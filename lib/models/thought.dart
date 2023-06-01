@@ -54,7 +54,7 @@ class Thought {
 
   ///Sets the server save time to the current time
   void savedOnServer() {
-    serverSaveTime = DateTime.now().microsecondsSinceEpoch;
+    serverSaveTime = DateTime.now().millisecondsSinceEpoch;
   }
 
   @override

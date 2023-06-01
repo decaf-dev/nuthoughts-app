@@ -1,6 +1,7 @@
 import "dart:async";
 
 import "package:get/get.dart";
+import "package:nuthoughts/controllers/app_controller.dart";
 import "package:nuthoughts/utils.dart";
 
 class SyncTime {
@@ -14,11 +15,14 @@ class SyncTime {
 
   //Every minute update the sync time display
   void startTimer() {
+    final AppController controller = Get.find();
     _refreshSyncDisplay();
+    controller.recentThoughts.refresh();
     _timer = Timer.periodic(
       const Duration(minutes: 1),
       (Timer timer) async {
         _refreshSyncDisplay();
+        controller.recentThoughts.refresh();
       },
     );
   }
