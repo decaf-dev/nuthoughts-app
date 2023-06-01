@@ -10,12 +10,11 @@ class SyncTime {
 
   void updateSyncTime() {
     _lastSyncTime.value = DateTime.now().millisecondsSinceEpoch;
-    restartTimer();
   }
 
-  void restartTimer() {
+  //Every minute update the sync time display
+  void startTimer() {
     _refreshSyncDisplay();
-    cancelTimer();
     _timer = Timer.periodic(
       const Duration(minutes: 1),
       (Timer timer) async {

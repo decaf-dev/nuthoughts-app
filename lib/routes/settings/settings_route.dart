@@ -30,7 +30,8 @@ class _SettingsRouteState extends State<SettingsRoute> {
                     title: const Text('IP Address'),
                     value: Text(controller.ipAddress.value),
                     onPressed: (BuildContext context) {
-                      _showSettingDialog("IP Address", controller.setIpAddress);
+                      _showSettingDialog(
+                          "IP Address", controller.saveIpAddress);
                     },
                   ),
                   SettingsTile.navigation(
@@ -38,7 +39,7 @@ class _SettingsRouteState extends State<SettingsRoute> {
                     title: const Text('Port'),
                     value: Text(controller.port.value),
                     onPressed: (BuildContext context) {
-                      _showSettingDialog("Port", controller.setPort);
+                      _showSettingDialog("Port", controller.savePort);
                     },
                   ),
                 ],

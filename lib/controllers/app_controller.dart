@@ -1,10 +1,9 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:cryptography/cryptography.dart';
-import 'package:hex/hex.dart';
 import 'package:nuthoughts/constants.dart';
-import 'package:nuthoughts/controllers/persisted_data.dart';
+import 'package:nuthoughts/controllers/saved_data.dart';
+import 'package:nuthoughts/models/encryption.dart';
 import 'package:nuthoughts/models/thought.dart';
 import 'package:nuthoughts/models/sync_time.dart';
 import 'package:get/get.dart';
@@ -16,53 +15,66 @@ class AppController extends GetxController {
   final syncTime = SyncTime();
   final ipAddress = ''.obs;
   final port = ''.obs;
+
   SecretKey? encryptionKey;
   String? encryptionKeyText;
-
   Timer? _reconnectionTimer;
+
+  late SharedPreferences _prefs;
 
   @override
   void onInit() async {
-    //Deserialize preferences
-    final prefs = await SharedPreferences.getInstance();
-    ipAddress.value = prefs.getString(Constants.ipAddressKey) ?? 'localhost';
-    port.value = prefs.getString(Constants.portKey) ?? '9005';
+    _prefs = await SharedPreferences.getInstance();
 
-    String? key = prefs.getString(Constants.encryptionKey);
-    if (key != null) {
-      encryptionKeyText = key;
-      encryptionKey = await deserializeSecretKey(key);
-    } else {
-      encryptionKey = await createSecretKey();
-      String serializedKey = await serializeSecretKey(encryptionKey!);
-      encryptionKeyText = serializedKey;
-      setEncryptionKey(serializedKey);
-    }
+    ipAddress.value = _prefs.getString(Constants.ipAddressKey) ?? 'localhost';
+    port.value = _prefs.getString(Constants.portKey) ?? '9005';
 
-    //Deserialize thoughts
-    //Prune thoughts that are over 1 day old
-    List<Thought> thoughts = await PersistedData.listThoughts();
-    for (Thought thought in thoughts) {
-      if (thought.shouldDelete()) {
-        await PersistedData.deleteThought(thought.id!);
-        thoughts.removeWhere((el) => el.id == thought.id);
-      }
-    }
-    recentThoughts.value = thoughts;
+    await _setupEncryption();
+    await _pruneOldThoughts();
 
     //Start the timer to update the sync time string
-    syncTime.restartTimer();
+    syncTime.startTimer();
 
     //Attempt to sync thoughts on start up
     bool success = await _syncUnsavedThoughts();
     if (!success) {
-      restartReconnectionTimer();
+      _restartReconnectionTimer();
     }
-    //Start disconnection timer
     super.onInit();
   }
 
-  void restartReconnectionTimer() {
+  Future<void> _setupEncryption() async {
+    //If have a base64Key in memory, convert it to a secret key
+    //Otherwise create a new random key, and save it in memory
+    String? base64Key = _prefs.getString(Constants.encryptionKey);
+    if (base64Key != null) {
+      encryptionKeyText = base64Key;
+      encryptionKey = await Encryption.serializeSecretKey(base64Key);
+    } else {
+      final SecretKey encryptionKey = await Encryption.createRandomKey();
+      this.encryptionKey = encryptionKey;
+
+      final String serializedKey =
+          await Encryption.deserializeSecretKey(encryptionKey);
+      encryptionKeyText = serializedKey;
+      await saveEncryptionKey(serializedKey);
+    }
+  }
+
+  Future<void> _pruneOldThoughts() async {
+    List<Thought> thoughts = await SavedData.listThoughts();
+    for (Thought thought in thoughts) {
+      if (thought.shouldDelete()) {
+        await SavedData.deleteThought(thought.id);
+        thoughts.removeWhere((el) => el.id == thought.id);
+      }
+    }
+
+    //Set the recent thoughts to the pruned list
+    recentThoughts.value = thoughts;
+  }
+
+  void _restartReconnectionTimer() {
     _reconnectionTimer?.cancel();
     _reconnectionTimer = Timer.periodic(
       const Duration(minutes: 1),
@@ -80,97 +92,76 @@ class AppController extends GetxController {
   }
 
   void saveThought(String text) async {
-    Thought thought = Thought(
-        creationTime: DateTime.now().millisecondsSinceEpoch, text: text.trim());
+    //Get num thoughts
+    final List<Thought> thoughts = await SavedData.listThoughts();
+    final int numThoughts = thoughts.length;
+
+    //Save the thought
+    final Thought thought = Thought(numThoughts, text.trim());
+    await SavedData.insertThought(thought);
     recentThoughts.add(thought);
-    int id = await PersistedData.insertThought(thought);
-    thought.id = id;
+
     bool wasSuccessful = await _thoughtPost(thought);
     if (wasSuccessful) {
       syncTime.updateSyncTime();
-    } else {
-      restartReconnectionTimer();
     }
   }
 
+  Future<String> encryptThought(Thought thought) {
+    final SecretKey? encryptionKey = this.encryptionKey;
+    if (encryptionKey == null) {
+      throw Exception('Encryption key not set');
+    }
+    return Encryption.encryptString(encryptionKey, thought.toJson());
+  }
+
+  ///Posts a thought to server
+  ///Return true if receives 201
+  ///Otherwise returns false
   Future<bool> _thoughtPost(Thought thought) async {
     try {
-      String encryptedThought = await encryptThought(thought);
+      String encryptedText = await encryptThought(thought);
       final response = await http
           .post(Uri.parse('http://${ipAddress.value}:${port.value}/thought'),
               headers: <String, String>{
                 'Content-Type': 'application/json; charset=UTF-8',
               },
-              body: encryptedThought)
+              body: encryptedText)
           .timeout(const Duration(seconds: 10));
       if (response.statusCode == 201) {
-        thought.updateServerSaveTime();
-        await PersistedData.updateThought(thought);
+        thought.savedOnServer();
+        await SavedData.updateThought(thought);
         //Refresh the entire list to update the display string
         recentThoughts.refresh();
         return true;
-      } else {
-        return false;
       }
+      return false;
     } catch (err) {
       return false;
     }
   }
 
-  Future<SecretKey> deserializeSecretKey(String key) async {
-    List<int> keyBuffer = base64Url.decode(key);
-    final algorithm = Chacha20.poly1305Aead();
-    final secretKey = await algorithm.newSecretKeyFromBytes(keyBuffer);
-    return secretKey;
-  }
-
-  Future<String> serializeSecretKey(SecretKey key) async {
-    List<int> keyBuffer = await key.extractBytes();
-    return base64Url.encode(keyBuffer);
-  }
-
-  Future<SecretKey> createSecretKey() async {
-    final algorithm = Chacha20.poly1305Aead();
-    final secretKey = await algorithm.newSecretKey();
-    return secretKey;
-  }
-
-  Future<String> encryptThought(Thought thought) async {
-    //Export the thought to json and then encode it as a string
-    String text = jsonEncode(thought.toJson());
-
-    //Get the text as raw bytes and the key as raw bytes
-    List<int> textBuffer = utf8.encode(text);
-
-    final algorithm = Chacha20.poly1305Aead();
-
-    //Encrypt the thought
-    final secretBox = await algorithm.encrypt(
-      textBuffer,
-      secretKey: encryptionKey!,
-    );
-
-    //Return the encrypted thought as a json string
-    return jsonEncode({
-      'nonce': HEX.encode(secretBox.nonce),
-      'cipherText': HEX.encode(secretBox.cipherText),
-      'mac': HEX.encode(secretBox.mac.bytes)
-    });
-  }
-
   Future<bool> _syncUnsavedThoughts() async {
+    //Get the thoughts that haven't been saved
     List<Thought> thoughtsToSave = recentThoughts
-        .where((thought) => !thought.hasBeenSavedOnServer())
+        .where((thought) => thought.hasBeenSavedOnServer() == false)
         .toList();
+
+    //Only preform the action if not empty
     if (thoughtsToSave.isNotEmpty) {
-      var result = await Future.wait(
+      //Attempt to sync every thought
+      List<bool> result = await Future.wait(
           thoughtsToSave.map((thought) => _thoughtPost(thought)));
+
+      //If one thought was successful, update the sync time
+      if (result.any((val) => val == true)) {
+        syncTime.updateSyncTime();
+      }
+
+      //If every thought was successful
       if (result.every((val) => val == true)) {
         //Cancel reconnection timer
         _reconnectionTimer?.cancel();
-        //If all the thoughts were successful
-        //then update the time and the display string
-        syncTime.updateSyncTime();
         return true;
       }
       return false;
@@ -178,25 +169,21 @@ class AppController extends GetxController {
     return true;
   }
 
-  void setIpAddress(String value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(Constants.ipAddressKey, value);
+  Future<void> saveIpAddress(String value) async {
+    await _prefs.setString(Constants.ipAddressKey, value);
     ipAddress.value = value;
   }
 
-  void setPort(String value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(Constants.portKey, value);
+  Future<void> savePort(String value) async {
+    await _prefs.setString(Constants.portKey, value);
     port.value = value;
   }
 
-  void setText(String value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(Constants.textKey, value);
+  Future<void> saveText(String value) async {
+    await _prefs.setString(Constants.textKey, value);
   }
 
-  void setEncryptionKey(String value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(Constants.encryptionKey, value);
+  Future<void> saveEncryptionKey(String value) async {
+    await _prefs.setString(Constants.encryptionKey, value);
   }
 }

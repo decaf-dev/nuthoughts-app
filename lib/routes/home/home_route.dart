@@ -87,7 +87,7 @@ class _HomeRouteState extends State<HomeRoute> {
                                   : const SpellCheckConfiguration(),
                               controller: textFieldController,
                               onChanged: (value) {
-                                controller.setText(value);
+                                controller.saveText(value);
                               },
                               style: const TextStyle(height: 1.3),
                               autofocus: true,
@@ -109,7 +109,7 @@ class _HomeRouteState extends State<HomeRoute> {
             if (text.isNotEmpty) {
               controller.saveThought(text);
               textFieldController.clear();
-              controller.setText("");
+              controller.saveText("");
             }
           },
         ));
