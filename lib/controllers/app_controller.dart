@@ -51,14 +51,18 @@ class AppController extends GetxController {
       encryptionKeyText = base64Key;
       encryptionKey = await Encryption.serializeSecretKey(base64Key);
     } else {
-      final SecretKey encryptionKey = await Encryption.createRandomKey();
-      this.encryptionKey = encryptionKey;
-
-      final String serializedKey =
-          await Encryption.deserializeSecretKey(encryptionKey);
-      encryptionKeyText = serializedKey;
-      await saveEncryptionKey(serializedKey);
+      setupNewSecretKey();
     }
+  }
+
+  Future<void> setupNewSecretKey() async {
+    final SecretKey encryptionKey = await Encryption.createRandomKey();
+    this.encryptionKey = encryptionKey;
+
+    final String serializedKey =
+        await Encryption.deserializeSecretKey(encryptionKey);
+    encryptionKeyText = serializedKey;
+    await saveEncryptionKey(serializedKey);
   }
 
   Future<void> _pruneOldThoughts() async {
@@ -95,12 +99,17 @@ class AppController extends GetxController {
   }
 
   void saveThought(String text) async {
+    //print('saveThought()');
     //Save the thought
     final Thought thought = Thought(text.trim());
-    await SavedData.insertThought(thought);
-    recentThoughts.add(thought);
 
+    int id = await SavedData.insertThought(thought);
+    //Set the id, this is important for future operations
+    thought.id = id;
+
+    recentThoughts.add(thought);
     bool wasSuccessful = await _thoughtPost(thought);
+
     if (wasSuccessful) {
       syncTime.updateSyncTime();
       //Restart the time. This is because the sync time needs to update exactly
@@ -123,6 +132,7 @@ class AppController extends GetxController {
   ///Return true if receives 201
   ///Otherwise returns false
   Future<bool> _thoughtPost(Thought thought) async {
+    //print('_thoughtPost()');
     try {
       String encryptedText = await encryptThought(thought);
       final response = await http
@@ -133,17 +143,20 @@ class AppController extends GetxController {
               body: encryptedText)
           .timeout(const Duration(seconds: 10));
       if (response.statusCode == 201) {
+        //print("response 201");
         thought.savedOnServer();
         await SavedData.updateThought(thought);
         return true;
       }
       return false;
     } catch (err) {
+      print(err);
       return false;
     }
   }
 
   Future<bool> _syncUnsavedThoughts() async {
+    //print('_syncUnsavedThoughts()');
     //Get the thoughts that haven't been saved
     List<Thought> thoughtsToSave = recentThoughts
         .where((thought) => thought.hasBeenSavedOnServer() == false)

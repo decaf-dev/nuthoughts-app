@@ -27,11 +27,12 @@ class SavedData {
       throw Exception("Cannot insert thought. Database is not open.");
     }
 
-    return await database.insert(
+    int id = await database.insert(
       'thoughts',
       thought.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+    return id;
   }
 
   static Future<void> updateThought(Thought thought) async {
