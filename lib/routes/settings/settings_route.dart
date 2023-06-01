@@ -69,6 +69,12 @@ class _SettingsRouteState extends State<SettingsRoute> {
             actions: <Widget>[
               TextButton(
                   onPressed: () {
+                    controller.setupNewSecretKey();
+                    _dismissDialog();
+                  },
+                  child: const Text('Regenerate')),
+              TextButton(
+                  onPressed: () {
                     _dismissDialog();
                   },
                   child: const Text('Close'))
