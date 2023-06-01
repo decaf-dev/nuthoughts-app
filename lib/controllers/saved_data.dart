@@ -14,7 +14,7 @@ class SavedData {
       join(await getDatabasesPath(), 'thoughts.db'),
       onCreate: (db, version) {
         return db.execute(
-          'CREATE TABLE thoughts(id INTEGER PRIMARY KEY, text TEXT, creationTime INTEGER, serverSaveTime INTEGER)',
+          'CREATE TABLE thoughts(id INTEGER PRIMARY KEY AUTOINCREMENT, text TEXT, creationTime INTEGER, serverSaveTime INTEGER)',
         );
       },
       version: 1,
@@ -60,9 +60,7 @@ class SavedData {
     final List<Map<String, dynamic>> maps = await database.query('thoughts');
 
     return List.generate(maps.length, (i) {
-      return Thought(maps[i]['id'], maps[i]['text'],
-          creationTime: maps[i]['creationTime'],
-          serverSaveTime: maps[i]['serverSaveTime']);
+      return Thought.fromDatabase(maps[i]);
     });
   }
 

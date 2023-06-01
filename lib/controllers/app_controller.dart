@@ -8,7 +8,6 @@ import 'package:nuthoughts/models/thought.dart';
 import 'package:nuthoughts/models/sync_time.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:nuthoughts/utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppController extends GetxController {
@@ -65,9 +64,12 @@ class AppController extends GetxController {
   Future<void> _pruneOldThoughts() async {
     List<Thought> thoughts = await SavedData.listThoughts();
     for (Thought thought in thoughts) {
-      if (thought.shouldDelete()) {
-        await SavedData.deleteThought(thought.id);
-        thoughts.removeWhere((el) => el.id == thought.id);
+      int? id = thought.id;
+      if (id != null) {
+        if (thought.shouldDelete()) {
+          await SavedData.deleteThought(id);
+          thoughts.removeWhere((el) => el.id == id);
+        }
       }
     }
 
@@ -94,7 +96,7 @@ class AppController extends GetxController {
 
   void saveThought(String text) async {
     //Save the thought
-    final Thought thought = Thought(generateRandomUUID(), text.trim());
+    final Thought thought = Thought(text.trim());
     await SavedData.insertThought(thought);
     recentThoughts.add(thought);
 
