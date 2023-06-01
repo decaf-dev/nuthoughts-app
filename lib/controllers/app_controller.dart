@@ -103,6 +103,11 @@ class AppController extends GetxController {
     bool wasSuccessful = await _thoughtPost(thought);
     if (wasSuccessful) {
       syncTime.updateSyncTime();
+      //Restart the time. This is because the sync time needs to update exactly
+      //1 minute from the last successful sync. Otherwise it will be out off by a few seconds
+      syncTime.restartTimer();
+      //Refresh the entire list to update the display string
+      recentThoughts.refresh();
     }
   }
 
@@ -130,8 +135,6 @@ class AppController extends GetxController {
       if (response.statusCode == 201) {
         thought.savedOnServer();
         await SavedData.updateThought(thought);
-        //Refresh the entire list to update the display string
-        recentThoughts.refresh();
         return true;
       }
       return false;
@@ -155,6 +158,11 @@ class AppController extends GetxController {
       //If one thought was successful, update the sync time
       if (result.any((val) => val == true)) {
         syncTime.updateSyncTime();
+        //Restart the time. This is because the sync time needs to update exactly
+        //1 minute from the last successful sync. Otherwise it will be out off by a few seconds
+        syncTime.restartTimer();
+        //Refresh the entire list to update the display string
+        recentThoughts.refresh();
       }
 
       //If every thought was successful

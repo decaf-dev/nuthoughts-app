@@ -23,6 +23,11 @@ class SyncTime {
     );
   }
 
+  void restartTimer() {
+    cancelTimer();
+    startTimer();
+  }
+
   void cancelTimer() {
     _timer?.cancel();
   }
