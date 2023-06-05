@@ -22,6 +22,7 @@ class SyncTime {
       const Duration(minutes: 1),
       (Timer timer) async {
         _refreshSyncDisplay();
+        await controller.syncUnsavedThoughts();
         controller.recentThoughts.refresh();
       },
     );

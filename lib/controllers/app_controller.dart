@@ -36,10 +36,7 @@ class AppController extends GetxController {
     syncTime.startTimer();
 
     //Attempt to sync thoughts on start up
-    bool success = await _syncUnsavedThoughts();
-    if (!success) {
-      _restartReconnectionTimer();
-    }
+    await syncUnsavedThoughts();
     super.onInit();
   }
 
@@ -84,16 +81,6 @@ class AppController extends GetxController {
     recentThoughts.value = thoughts;
   }
 
-  void _restartReconnectionTimer() {
-    _reconnectionTimer?.cancel();
-    _reconnectionTimer = Timer.periodic(
-      const Duration(minutes: 1),
-      (Timer timer) async {
-        await _syncUnsavedThoughts();
-      },
-    );
-  }
-
   @override
   void dispose() {
     syncTime.dispose();
@@ -102,7 +89,6 @@ class AppController extends GetxController {
   }
 
   void saveThought(String text) async {
-    //print('saveThought()');
     //Save the thought
     final Thought thought = Thought(text.trim());
 
@@ -119,7 +105,7 @@ class AppController extends GetxController {
       //1 minute from the last successful sync. Otherwise it will be out off by a few seconds
       syncTime.restartTimer();
 
-      _syncUnsavedThoughts();
+      await syncUnsavedThoughts();
     }
   }
 
@@ -135,7 +121,6 @@ class AppController extends GetxController {
   ///Return true if receives 201
   ///Otherwise returns false
   Future<bool> _thoughtPost(Thought thought) async {
-    //print('_thoughtPost()');
     try {
       String encryptedText = await encryptThought(thought);
       final response = await http
@@ -158,8 +143,7 @@ class AppController extends GetxController {
     }
   }
 
-  Future<bool> _syncUnsavedThoughts() async {
-    //print('_syncUnsavedThoughts()');
+  Future<void> syncUnsavedThoughts() async {
     //Get the thoughts that haven't been saved
     List<Thought> thoughtsToSave = recentThoughts
         .where((thought) => thought.hasBeenSavedOnServer() == false)
@@ -178,16 +162,7 @@ class AppController extends GetxController {
         //1 minute from the last successful sync. Otherwise it will be out off by a few seconds
         syncTime.restartTimer();
       }
-
-      //If every thought was successful
-      if (result.every((val) => val == true)) {
-        //Cancel reconnection timer
-        _reconnectionTimer?.cancel();
-        return true;
-      }
-      return false;
     }
-    return true;
   }
 
   Future<void> saveIpAddress(String value) async {
