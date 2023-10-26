@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:nuthoughts/constants.dart';
 import 'package:nuthoughts/controllers/app_controller.dart';
-import 'package:nuthoughts/routes/recent_thoughts/recent_thoughts.dart';
 import 'package:nuthoughts/routes/settings/settings_route.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -45,18 +44,6 @@ class _HomeRouteState extends State<HomeRoute> {
         appBar: AppBar(
           title: Text(widget.title),
           actions: [
-            IconButton(
-                icon: const Icon(
-                  Icons.notes,
-                  color: Colors.white,
-                ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const RecentThoughtsRoute()),
-                  );
-                }),
             IconButton(
                 icon: const Icon(
                   Icons.settings,
