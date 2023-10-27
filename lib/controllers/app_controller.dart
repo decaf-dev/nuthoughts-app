@@ -75,14 +75,14 @@ class AppController extends GetxController {
     thought.id = id;
 
     savedThoughts.add(thought);
-    bool wasSuccessful = await _thoughtPost(thought);
+    // bool wasSuccessful = await _thoughtPost(thought);
 
-    if (wasSuccessful) {
-      syncTime.updateSyncTime();
-      //Restart the time. This is because the sync time needs to update exactly
-      //1 minute from the last successful sync. Otherwise it will be out off by a few seconds
-      syncTime.restartTimer();
-    }
+    // if (wasSuccessful) {
+    //   syncTime.updateSyncTime();
+    //   //Restart the time. This is because the sync time needs to update exactly
+    //   //1 minute from the last successful sync. Otherwise it will be out off by a few seconds
+    //   syncTime.restartTimer();
+    // }
   }
 
   ///Posts a thought to server
