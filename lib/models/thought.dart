@@ -40,10 +40,10 @@ class Thought {
     });
   }
 
-  ///If the thought is older than 1 day and it is has been saved on the server
+  ///If the thought is older than 3 days and it is has been saved on the server
   bool shouldDelete() {
     return DateTime.now().millisecondsSinceEpoch - creationTime >
-            constants.millisDay &&
+            constants.millisDay * 3 &&
         hasBeenSavedOnServer();
   }
 
