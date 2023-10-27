@@ -1,3 +1,7 @@
+import 'dart:io';
+import 'dart:typed_data';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:nuthoughts/controllers/app_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -42,45 +46,29 @@ class _SettingsRouteState extends State<SettingsRoute> {
                       _showSettingDialog("Port", controller.savePort);
                     },
                   ),
+                  SettingsTile.navigation(
+                    leading: const Icon(Icons.security),
+                    title: const Text('Certificate authority'),
+                    onPressed: (BuildContext context) async {
+                      FilePickerResult? result =
+                          await FilePicker.platform.pickFiles(
+                        type: FileType.custom,
+                        allowedExtensions: ['pem'],
+                      );
+
+                      if (result != null) {
+                        File file = File(result.files.single.path!);
+                        Uint8List data = await file.readAsBytes();
+                        SecurityContext.defaultContext
+                            .setTrustedCertificatesBytes(data);
+                      }
+                    },
+                  ),
                 ],
               ),
-              SettingsSection(title: const Text("Encryption"), tiles: [
-                SettingsTile.navigation(
-                  leading: const Icon(Icons.key),
-                  title: const Text('Encryption Key'),
-                  value: const Text("Tap to view"),
-                  onPressed: (BuildContext context) {
-                    _showEncryptionKeyDialog();
-                  },
-                ),
-              ])
             ],
           ),
         ));
-  }
-
-  void _showEncryptionKeyDialog() {
-    showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text("Encryption Key"),
-            content: Text(controller.encryptionKeyText ?? ""),
-            actions: <Widget>[
-              TextButton(
-                  onPressed: () {
-                    controller.setupNewSecretKey();
-                    _dismissDialog();
-                  },
-                  child: const Text('Regenerate')),
-              TextButton(
-                  onPressed: () {
-                    _dismissDialog();
-                  },
-                  child: const Text('Close'))
-            ],
-          );
-        });
   }
 
   void _showSettingDialog(String title, Function(String value) onSave) {
