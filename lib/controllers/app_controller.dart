@@ -37,8 +37,8 @@ class AppController extends GetxController {
     //Start the timer to update the sync time string
     syncTime.startTimer();
 
-    //Attempt to sync thoughts on start up
-    await syncUnsavedThoughts();
+    // //Attempt to sync thoughts on start up
+    // await syncUnsavedThoughts();
     super.onInit();
   }
 
@@ -116,6 +116,7 @@ class AppController extends GetxController {
   }
 
   Future<void> syncUnsavedThoughts() async {
+    print("Syncing unsaved thoughts");
     //Get the thoughts that haven't been saved
     List<Thought> thoughtsToSave = recentThoughts
         .where((thought) => thought.hasBeenSavedOnServer() == false)
