@@ -59,7 +59,14 @@ class _SettingsRouteState extends State<SettingsRoute> {
                       if (result != null) {
                         File file = File(result.files.single.path!);
                         Uint8List data = await file.readAsBytes();
-                        controller.saveCertificateAuthority(data);
+                        await controller.saveCertificateAuthority(data);
+
+                        if (!context.mounted) return;
+                        const SnackBar snackBar = SnackBar(
+                          backgroundColor: Colors.green,
+                          content: Text('Certificate authority saved'),
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
                       }
                     },
                   ),
