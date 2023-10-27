@@ -47,6 +47,7 @@ class _MessageInputState extends State<MessageInput> {
           children: <Widget>[
             Expanded(
               child: TextField(
+                autofocus: true,
                 minLines: 1,
                 maxLines: 5,
                 keyboardType: TextInputType.multiline,
