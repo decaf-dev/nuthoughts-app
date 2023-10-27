@@ -11,7 +11,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppController extends GetxController {
-  final recentThoughts = <Thought>[].obs;
+  final savedThoughts = <Thought>[].obs;
   final syncTime = SyncTime();
   final ipAddress = ''.obs;
   final port = ''.obs;
@@ -56,7 +56,7 @@ class AppController extends GetxController {
     }
 
     //Set the recent thoughts to the pruned list
-    recentThoughts.value = thoughts;
+    savedThoughts.value = thoughts;
   }
 
   @override
@@ -74,7 +74,7 @@ class AppController extends GetxController {
     //Set the id, this is important for future operations
     thought.id = id;
 
-    recentThoughts.add(thought);
+    savedThoughts.add(thought);
     bool wasSuccessful = await _thoughtPost(thought);
 
     if (wasSuccessful) {
@@ -89,9 +89,9 @@ class AppController extends GetxController {
   ///Return true if receives 201
   ///Otherwise returns false
   Future<bool> _thoughtPost(Thought thought) async {
-    print(
-        "Posting thought to: https://${ipAddress.value}:${port.value}/thought");
     try {
+      print(
+          "Posting thought to: https://${ipAddress.value}:${port.value}/thought");
       final response = await http
           .post(Uri.parse('https://${ipAddress.value}:${port.value}/thought'),
               headers: <String, String>{
@@ -112,9 +112,9 @@ class AppController extends GetxController {
   }
 
   Future<void> syncThoughts() async {
-    print("Syncing unsaved thoughts");
+    print("Syncing thoughts");
     //Get the thoughts that haven't been saved
-    List<Thought> thoughtsToSave = recentThoughts
+    List<Thought> thoughtsToSave = savedThoughts
         .where((thought) => thought.hasBeenSavedOnServer() == false)
         .toList();
 

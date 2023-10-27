@@ -1,9 +1,7 @@
-import 'package:nuthoughts/constants.dart' as constants;
 import 'package:nuthoughts/controllers/app_controller.dart';
 import 'package:nuthoughts/routes/settings/settings_route.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nuthoughts/routes/home/message_input.dart';
 
 class HomeRoute extends StatefulWidget {
@@ -84,7 +82,6 @@ class _HomeRouteState extends State<HomeRoute> {
         //               ]),
         //         )))
         MessageInput(controller.saveText, (String text) {
-          print("HERE!");
           controller.saveThought(text);
           controller.saveText("");
         }),

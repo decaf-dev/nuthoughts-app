@@ -15,9 +15,7 @@ class SyncTime {
 
   //Every minute update the sync time display
   void startTimer() {
-    final AppController controller = Get.find();
     _refreshSyncDisplay();
-    controller.recentThoughts.refresh();
     _timer = Timer.periodic(
       const Duration(minutes: 1),
       (Timer timer) async {
