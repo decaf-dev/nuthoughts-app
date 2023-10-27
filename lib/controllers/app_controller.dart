@@ -111,7 +111,7 @@ class AppController extends GetxController {
     }
   }
 
-  Future<void> syncUnsavedThoughts() async {
+  Future<void> syncThoughts() async {
     print("Syncing unsaved thoughts");
     //Get the thoughts that haven't been saved
     List<Thought> thoughtsToSave = recentThoughts
