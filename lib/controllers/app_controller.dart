@@ -37,8 +37,6 @@ class AppController extends GetxController {
     //Start the timer to update the sync time string
     syncTime.startTimer();
 
-    // //Attempt to sync thoughts on start up
-    // await syncUnsavedThoughts();
     super.onInit();
   }
 
@@ -84,8 +82,6 @@ class AppController extends GetxController {
       //Restart the time. This is because the sync time needs to update exactly
       //1 minute from the last successful sync. Otherwise it will be out off by a few seconds
       syncTime.restartTimer();
-
-      await syncUnsavedThoughts();
     }
   }
 
