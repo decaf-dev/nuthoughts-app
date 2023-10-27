@@ -75,6 +75,7 @@ class AppController extends GetxController {
     thought.id = id;
 
     savedThoughts.add(thought);
+    savedThoughts.refresh();
     // bool wasSuccessful = await _thoughtPost(thought);
 
     // if (wasSuccessful) {
@@ -90,8 +91,8 @@ class AppController extends GetxController {
   ///Otherwise returns false
   Future<bool> _thoughtPost(Thought thought) async {
     try {
-      print(
-          "Posting thought to: https://${ipAddress.value}:${port.value}/thought");
+      print("POST https://${ipAddress.value}:${port.value}/thought");
+      print(thought.toString());
       final response = await http
           .post(Uri.parse('https://${ipAddress.value}:${port.value}/thought'),
               headers: <String, String>{

@@ -1,7 +1,6 @@
 import "dart:async";
 
 import "package:get/get.dart";
-import "package:nuthoughts/controllers/app_controller.dart";
 import "package:nuthoughts/utils.dart";
 
 class SyncTime {

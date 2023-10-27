@@ -57,30 +57,15 @@ class _HomeRouteState extends State<HomeRoute> {
       body: Column(children: [
         _lastSynced(),
         const SizedBox(height: 10),
-        // Expanded(
-        //     child: Padding(
-        //         padding: const EdgeInsets.fromLTRB(20, 0, 20, 60),
-        //         child: SingleChildScrollView(
-        //           child: Column(
-        //               crossAxisAlignment: CrossAxisAlignment.start,
-        //               children: [
-        //                 TextField(
-        //                     spellCheckConfiguration: kIsWeb
-        //                         ? null
-        //                         : const SpellCheckConfiguration(),
-        //                     controller: textFieldController,
-        //                     onChanged: (value) {
-        //                       controller.saveText(value);
-        //                     },
-        //                     style: const TextStyle(height: 1.3),
-        //                     autofocus: true,
-        //                     decoration: const InputDecoration(
-        //                         border: InputBorder.none),
-        //                     keyboardType: TextInputType.multiline,
-        //                     minLines: 10,
-        //                     maxLines: null)
-        //               ]),
-        //         )))
+        Obx(() => Expanded(
+            child: ListView.builder(
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    title: Text(controller.savedThoughts[index].text),
+                    subtitle: Text(controller.savedThoughts[index].text),
+                  );
+                },
+                itemCount: controller.savedThoughts.length))),
         MessageInput(controller.saveText, (String text) {
           controller.saveThought(text);
           controller.saveText("");
