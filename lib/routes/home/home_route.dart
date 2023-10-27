@@ -46,6 +46,14 @@ class _HomeRouteState extends State<HomeRoute> {
           actions: [
             IconButton(
                 icon: const Icon(
+                  Icons.sync,
+                  color: Colors.white,
+                ),
+                onPressed: () {
+                  controller.syncUnsavedThoughts();
+                }),
+            IconButton(
+                icon: const Icon(
                   Icons.settings,
                   color: Colors.white,
                 ),
