@@ -4,6 +4,7 @@ import 'package:nuthoughts/routes/settings/settings_route.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nuthoughts/routes/home/message_input.dart';
+import 'package:nuthoughts/widgets/confirmation.dart';
 
 class HomeRoute extends StatefulWidget {
   const HomeRoute({super.key, required this.title});
@@ -39,9 +40,11 @@ class _HomeRouteState extends State<HomeRoute> {
                 IconButton(
                   icon: const Icon(Icons.restore),
                   onPressed: () async {
-                    await controller.restoreThought(actionBarThoughtId!);
-                    setState(() {
-                      actionBarThoughtId = null;
+                    showConfirmationDialog(context, "Undo thought", () async {
+                      await controller.restoreThought(actionBarThoughtId!);
+                      setState(() {
+                        actionBarThoughtId = null;
+                      });
                     });
                   },
                 ),

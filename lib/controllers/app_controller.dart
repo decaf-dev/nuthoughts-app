@@ -121,8 +121,10 @@ class AppController extends GetxController {
     //Update text controller
     textController.text += thought.text;
     saveText(textController.text);
-    savedThoughts.removeWhere((el) => el.id == id);
+
     await SQLData.deleteThought(id);
+    savedThoughts.removeWhere((el) => el.id == id);
+    savedThoughts.refresh();
   }
 
   Future<void> _pruneOldThoughts() async {
