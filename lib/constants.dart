@@ -1,9 +1,7 @@
-class Constants {
-  static const ipAddressKey = "ip-address";
-  static const portKey = "port";
-  static const textKey = "text";
+const ipAddressKey = "ip-address";
+const portKey = "port";
+const textKey = "text";
 
-  static const millisMinute = 1000 * 60;
-  static const millisHour = millisMinute * 60;
-  static const millisDay = millisHour * 24;
-}
+const millisMinute = 1000 * 60;
+const millisHour = millisMinute * 60;
+const millisDay = millisHour * 24;
