@@ -113,7 +113,11 @@ class AppController extends GetxController {
   }
 
   void _updateSecurityContext(Uint8List value) {
-    print("Updating security context with certificate authority");
+    // String string = String.fromCharCodes(value);
+    // print(string);
+
+    //TODO there was a bug where changing from an invalid to a new certificate
+    //wasn't updating. Does this function update?
     SecurityContext.defaultContext.setTrustedCertificatesBytes(value);
   }
 
