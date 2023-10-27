@@ -47,15 +47,28 @@ class _MessageInputState extends State<MessageInput> {
           children: <Widget>[
             Expanded(
               child: TextField(
-                controller: _controller,
+                minLines: 1,
+                maxLines: 5,
+                keyboardType: TextInputType.multiline,
                 decoration: const InputDecoration(
                   hintText: 'What are you thinking?',
                 ),
+                controller: _controller,
                 onChanged: (text) {
                   setState(() {});
                   widget.onChanged(_controller.text);
                 },
               ),
+              // child: TextField(
+              //   controller: _controller,
+              //   decoration: const InputDecoration(
+              //     hintText: 'What are you thinking?',
+              //   ),
+              //   onChanged: (text) {
+              //     setState(() {});
+              //     widget.onChanged(_controller.text);
+              //   },
+              // ),
             ),
             IconButton(
               icon: const Icon(Icons.send),
