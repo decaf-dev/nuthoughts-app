@@ -1,9 +1,10 @@
 import 'dart:async';
+import 'dart:typed_data';
 import 'package:nuthoughts/models/thought.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
-class SavedData {
+class SQLData {
   static Database? database;
 
   ///Opens the database
@@ -13,16 +14,54 @@ class SavedData {
     database = await openDatabase(
       join(await getDatabasesPath(), 'thoughts.db'),
       onCreate: (db, version) {
-        return db.execute(
+        db.execute(
           'CREATE TABLE thoughts(id INTEGER PRIMARY KEY AUTOINCREMENT, text TEXT, creationTime INTEGER, serverSaveTime INTEGER)',
+        );
+
+        return db.execute(
+          'CREATE TABLE certificateAuthority(id INTEGER PRIMARY KEY, value BLOB)',
         );
       },
       version: 1,
     );
   }
 
+  static Future<void> insertCertificateAuthority(List<int> value) async {
+    final Database? database = SQLData.database;
+    if (database == null) {
+      throw Exception(
+          "Cannot insert certificate authority. Database is not open.");
+    }
+
+    await database.insert(
+      'certificateAuthority',
+      {
+        'id': 0,
+        'value': value,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  static Future<Uint8List?> getCertificateAuthority() async {
+    final Database? database = SQLData.database;
+    if (database == null) {
+      throw Exception(
+          "Cannot get certificate authority. Database is not open.");
+    }
+
+    List<Map<String, dynamic>> maps =
+        await database.query('certificateAuthority');
+
+    if (maps.isEmpty) {
+      return null;
+    }
+
+    return maps[0]['value'];
+  }
+
   static Future<int> insertThought(Thought thought) async {
-    final Database? database = SavedData.database;
+    final Database? database = SQLData.database;
     if (database == null) {
       throw Exception("Cannot insert thought. Database is not open.");
     }
@@ -36,7 +75,7 @@ class SavedData {
   }
 
   static Future<void> updateThought(Thought thought) async {
-    final Database? database = SavedData.database;
+    final Database? database = SQLData.database;
 
     if (database == null) {
       throw Exception("Cannot update thought. Database is not open.");
@@ -52,7 +91,7 @@ class SavedData {
   }
 
   static Future<List<Thought>> listThoughts() async {
-    final Database? database = SavedData.database;
+    final Database? database = SQLData.database;
 
     if (database == null) {
       throw Exception("Cannot list thoughts. Database is not open.");
@@ -66,7 +105,7 @@ class SavedData {
   }
 
   static Future<void> deleteThought(int id) async {
-    final Database? database = SavedData.database;
+    final Database? database = SQLData.database;
     if (database == null) {
       throw Exception("Cannot delete thought. Database is not open.");
     }

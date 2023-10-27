@@ -59,8 +59,7 @@ class _SettingsRouteState extends State<SettingsRoute> {
                       if (result != null) {
                         File file = File(result.files.single.path!);
                         Uint8List data = await file.readAsBytes();
-                        SecurityContext.defaultContext
-                            .setTrustedCertificatesBytes(data);
+                        controller.saveCertificateAuthority(data);
                       }
                     },
                   ),

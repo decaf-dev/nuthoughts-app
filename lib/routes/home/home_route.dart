@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:nuthoughts/constants.dart';
+import 'package:nuthoughts/constants.dart' as constants;
 import 'package:nuthoughts/controllers/app_controller.dart';
 import 'package:nuthoughts/routes/settings/settings_route.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +28,7 @@ class _HomeRouteState extends State<HomeRoute> {
   void initializeTextController() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      textFieldController.text = prefs.getString(Constants.textKey) ?? '';
+      textFieldController.text = prefs.getString(constants.textKey) ?? '';
     });
   }
 

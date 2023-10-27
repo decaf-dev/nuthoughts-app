@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:nuthoughts/constants.dart';
+import 'package:nuthoughts/constants.dart' as constants;
 
 class Thought {
   //-1 because sqlite doesn't allow null values
@@ -43,7 +43,7 @@ class Thought {
   ///If the thought is older than 1 day and it is has been saved on the server
   bool shouldDelete() {
     return DateTime.now().millisecondsSinceEpoch - creationTime >
-            Constants.millisDay &&
+            constants.millisDay &&
         hasBeenSavedOnServer();
   }
 

@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:io';
+import 'dart:typed_data';
 
-import 'package:nuthoughts/constants.dart';
-import 'package:nuthoughts/controllers/saved_data.dart';
+import 'package:nuthoughts/constants.dart' as constants;
+import 'package:nuthoughts/controllers/sql_data.dart';
 import 'package:nuthoughts/models/thought.dart';
 import 'package:nuthoughts/models/sync_time.dart';
 import 'package:get/get.dart';
@@ -22,8 +24,13 @@ class AppController extends GetxController {
   void onInit() async {
     _prefs = await SharedPreferences.getInstance();
 
-    ipAddress.value = _prefs.getString(Constants.ipAddressKey) ?? 'localhost';
-    port.value = _prefs.getString(Constants.portKey) ?? '8123';
+    ipAddress.value = _prefs.getString(constants.ipAddressKey) ?? 'localhost';
+    port.value = _prefs.getString(constants.portKey) ?? '8123';
+
+    Uint8List? caData = await SQLData.getCertificateAuthority();
+    if (caData != null) {
+      _updateSecurityContext(caData);
+    }
 
     await _pruneOldThoughts();
 
@@ -36,7 +43,7 @@ class AppController extends GetxController {
   }
 
   Future<void> _pruneOldThoughts() async {
-    List<Thought> thoughts = await SavedData.listThoughts();
+    List<Thought> thoughts = await SQLData.listThoughts();
 
     //Create a copy of the list to prevent concurrent modification
     //Concurrent modification during iteration
@@ -44,7 +51,7 @@ class AppController extends GetxController {
       int id = thought.id;
       if (id != -1) {
         if (thought.shouldDelete()) {
-          await SavedData.deleteThought(id);
+          await SQLData.deleteThought(id);
           thoughts.removeWhere((el) => el.id == id);
         }
       }
@@ -65,7 +72,7 @@ class AppController extends GetxController {
     //Save the thought
     final Thought thought = Thought(text.trim());
 
-    int id = await SavedData.insertThought(thought);
+    int id = await SQLData.insertThought(thought);
     //Set the id, this is important for future operations
     thought.id = id;
 
@@ -98,7 +105,7 @@ class AppController extends GetxController {
           .timeout(const Duration(seconds: 10));
       if (response.statusCode == 201) {
         thought.savedOnServer();
-        await SavedData.updateThought(thought);
+        await SQLData.updateThought(thought);
         return true;
       }
       return false;
@@ -131,16 +138,26 @@ class AppController extends GetxController {
   }
 
   Future<void> saveIpAddress(String value) async {
-    await _prefs.setString(Constants.ipAddressKey, value);
+    await _prefs.setString(constants.ipAddressKey, value);
     ipAddress.value = value;
   }
 
   Future<void> savePort(String value) async {
-    await _prefs.setString(Constants.portKey, value);
+    await _prefs.setString(constants.portKey, value);
     port.value = value;
   }
 
   Future<void> saveText(String value) async {
-    await _prefs.setString(Constants.textKey, value);
+    await _prefs.setString(constants.textKey, value);
+  }
+
+  Future<void> saveCertificateAuthority(Uint8List value) async {
+    await SQLData.insertCertificateAuthority(value);
+    _updateSecurityContext(value);
+  }
+
+  void _updateSecurityContext(Uint8List value) {
+    print("Updating security context with certificate authority");
+    SecurityContext.defaultContext.setTrustedCertificatesBytes(value);
   }
 }
