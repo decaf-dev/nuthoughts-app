@@ -33,6 +33,7 @@ class _HomeRouteState extends State<HomeRoute> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: controller.scaffoldKey,
       appBar: AppBar(
         title: Text(widget.title),
         actions: actionBarThoughtId != null

@@ -21,6 +21,7 @@ class AppController extends GetxController {
 
   late SharedPreferences _prefs;
   TextEditingController textController = TextEditingController();
+  GlobalKey scaffoldKey = GlobalKey();
 
   @override
   void onInit() async {
@@ -166,8 +167,28 @@ class AppController extends GetxController {
         return true;
       }
       return false;
+    } on HandshakeException catch (err) {
+      print(err);
+      const SnackBar snackBar = SnackBar(
+        backgroundColor: Colors.red,
+        content: Text("Handshake error. Check certificate authority"),
+      );
+      ScaffoldMessenger.of(scaffoldKey.currentContext!).showSnackBar(snackBar);
+      return false;
+    } on SocketException catch (err) {
+      print(err);
+      const SnackBar snackBar = SnackBar(
+        backgroundColor: Colors.red,
+        content: Text(
+            "Socket error. Check IP address and port.\nIs the server running?"),
+      );
+      ScaffoldMessenger.of(scaffoldKey.currentContext!).showSnackBar(snackBar);
+      return false;
     } catch (err) {
       print(err);
+      const SnackBar snackBar = SnackBar(
+          backgroundColor: Colors.red, content: Text("Unhandled exception"));
+      ScaffoldMessenger.of(scaffoldKey.currentContext!).showSnackBar(snackBar);
       return false;
     }
   }
