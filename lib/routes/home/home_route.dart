@@ -1,4 +1,5 @@
 import 'package:nuthoughts/controllers/app_controller.dart';
+import 'package:nuthoughts/routes/home/thought_bubble.dart';
 import 'package:nuthoughts/routes/settings/settings_route.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -58,14 +59,15 @@ class _HomeRouteState extends State<HomeRoute> {
         _lastSynced(),
         const SizedBox(height: 10),
         Obx(() => Expanded(
-            child: ListView.builder(
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(controller.savedThoughts[index].text),
-                    subtitle: Text(controller.savedThoughts[index].text),
-                  );
-                },
-                itemCount: controller.savedThoughts.length))),
+                child: ListView.builder(
+              itemBuilder: (context, index) {
+                return Align(
+                  alignment: Alignment.centerRight,
+                  child: ThoughtBubble(controller.savedThoughts[index].text),
+                );
+              },
+              itemCount: controller.savedThoughts.length,
+            ))),
         MessageInput(controller.saveText, (String text) {
           controller.saveThought(text);
           controller.saveText("");

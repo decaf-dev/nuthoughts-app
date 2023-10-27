@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ThoughtBubble extends StatefulWidget {
-  const ThoughtBubble(this.text, {super.key});
+  const ThoughtBubble(this.text, {Key? key}) : super(key: key);
 
   final String text;
 
@@ -12,17 +12,39 @@ class ThoughtBubble extends StatefulWidget {
 class _ThoughtBubbleState extends State<ThoughtBubble> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-      margin: const EdgeInsets.only(bottom: 10),
-      decoration: BoxDecoration(
-        color: Colors.blue,
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: Text(
-        widget.text,
-        style: const TextStyle(color: Colors.white),
-      ),
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final TextPainter textPainter = TextPainter(
+          text: TextSpan(
+              text: widget.text, style: const TextStyle(color: Colors.white)),
+          maxLines: 1,
+          textDirection: TextDirection.ltr,
+        )..layout(maxWidth: constraints.maxWidth);
+
+        final double maxWidth = textPainter.didExceedMaxLines
+            ? constraints.maxWidth * 0.75
+            : textPainter.width + 30; // Adding 30 for padding
+
+        return Container(
+            margin: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+            child: InkWell(
+                borderRadius: BorderRadius.circular(15),
+                onTap: () {},
+                onLongPress: () {},
+                child: Ink(
+                  width: maxWidth,
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                  decoration: BoxDecoration(
+                    color: Colors.blueAccent,
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Text(
+                    widget.text,
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                )));
+      },
     );
   }
 }
