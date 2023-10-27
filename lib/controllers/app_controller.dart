@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/material.dart';
 import 'package:nuthoughts/constants.dart' as constants;
 import 'package:nuthoughts/controllers/sql_data.dart';
 import 'package:nuthoughts/models/thought.dart';
@@ -19,6 +20,7 @@ class AppController extends GetxController {
   Timer? _reconnectionTimer;
 
   late SharedPreferences _prefs;
+  TextEditingController textController = TextEditingController();
 
   @override
   void onInit() async {
@@ -40,30 +42,34 @@ class AppController extends GetxController {
     super.onInit();
   }
 
-  Future<void> _pruneOldThoughts() async {
-    List<Thought> thoughts = await SQLData.listThoughts();
-
-    //Create a copy of the list to prevent concurrent modification
-    //Concurrent modification during iteration
-    for (Thought thought in List.from(thoughts)) {
-      int id = thought.id;
-      if (id != -1) {
-        if (thought.shouldDelete()) {
-          await SQLData.deleteThought(id);
-          thoughts.removeWhere((el) => el.id == id);
-        }
-      }
-    }
-
-    //Set the recent thoughts to the pruned list
-    savedThoughts.value = thoughts;
-  }
-
   @override
   void dispose() {
     syncTime.dispose();
     _reconnectionTimer?.cancel();
     super.dispose();
+  }
+
+  Future<void> syncThoughts() async {
+    print("Syncing thoughts");
+    //Get the thoughts that haven't been saved
+    List<Thought> thoughtsToSave = savedThoughts
+        .where((thought) => thought.hasBeenSavedOnServer() == false)
+        .toList();
+
+    //Only preform the action if not empty
+    if (thoughtsToSave.isNotEmpty) {
+      //Attempt to sync every thought
+      List<bool> result = await Future.wait(
+          thoughtsToSave.map((thought) => _thoughtPost(thought)));
+
+      //If one thought was successful, update the sync time
+      if (result.any((val) => val == true)) {
+        syncTime.updateSyncTime();
+        //Restart the time. This is because the sync time needs to update exactly
+        //1 minute from the last successful sync. Otherwise it will be out off by a few seconds
+        syncTime.restartTimer();
+      }
+    }
   }
 
   void saveThought(String text) async {
@@ -84,6 +90,58 @@ class AppController extends GetxController {
     //   //1 minute from the last successful sync. Otherwise it will be out off by a few seconds
     //   syncTime.restartTimer();
     // }
+  }
+
+  Future<void> saveIpAddress(String value) async {
+    await _prefs.setString(constants.ipAddressKey, value);
+    ipAddress.value = value;
+  }
+
+  Future<void> savePort(String value) async {
+    await _prefs.setString(constants.portKey, value);
+    port.value = value;
+  }
+
+  Future<void> saveText(String value) async {
+    await _prefs.setString(constants.textKey, value);
+  }
+
+  Future<void> saveCertificateAuthority(Uint8List value) async {
+    await SQLData.insertCertificateAuthority(value);
+    _updateSecurityContext(value);
+  }
+
+  void _updateSecurityContext(Uint8List value) {
+    print("Updating security context with certificate authority");
+    SecurityContext.defaultContext.setTrustedCertificatesBytes(value);
+  }
+
+  Future<void> restoreThought(int id) async {
+    Thought thought = savedThoughts.firstWhere((el) => el.id == id);
+    //Update text controller
+    textController.text += thought.text;
+    saveText(textController.text);
+    savedThoughts.removeWhere((el) => el.id == id);
+    await SQLData.deleteThought(id);
+  }
+
+  Future<void> _pruneOldThoughts() async {
+    List<Thought> thoughts = await SQLData.listThoughts();
+
+    //Create a copy of the list to prevent concurrent modification
+    //Concurrent modification during iteration
+    for (Thought thought in List.from(thoughts)) {
+      int id = thought.id;
+      if (id != -1) {
+        if (thought.shouldDelete()) {
+          await SQLData.deleteThought(id);
+          thoughts.removeWhere((el) => el.id == id);
+        }
+      }
+    }
+
+    //Set the recent thoughts to the pruned list
+    savedThoughts.value = thoughts;
   }
 
   ///Posts a thought to server
@@ -110,52 +168,5 @@ class AppController extends GetxController {
       print(err);
       return false;
     }
-  }
-
-  Future<void> syncThoughts() async {
-    print("Syncing thoughts");
-    //Get the thoughts that haven't been saved
-    List<Thought> thoughtsToSave = savedThoughts
-        .where((thought) => thought.hasBeenSavedOnServer() == false)
-        .toList();
-
-    //Only preform the action if not empty
-    if (thoughtsToSave.isNotEmpty) {
-      //Attempt to sync every thought
-      List<bool> result = await Future.wait(
-          thoughtsToSave.map((thought) => _thoughtPost(thought)));
-
-      //If one thought was successful, update the sync time
-      if (result.any((val) => val == true)) {
-        syncTime.updateSyncTime();
-        //Restart the time. This is because the sync time needs to update exactly
-        //1 minute from the last successful sync. Otherwise it will be out off by a few seconds
-        syncTime.restartTimer();
-      }
-    }
-  }
-
-  Future<void> saveIpAddress(String value) async {
-    await _prefs.setString(constants.ipAddressKey, value);
-    ipAddress.value = value;
-  }
-
-  Future<void> savePort(String value) async {
-    await _prefs.setString(constants.portKey, value);
-    port.value = value;
-  }
-
-  Future<void> saveText(String value) async {
-    await _prefs.setString(constants.textKey, value);
-  }
-
-  Future<void> saveCertificateAuthority(Uint8List value) async {
-    await SQLData.insertCertificateAuthority(value);
-    _updateSecurityContext(value);
-  }
-
-  void _updateSecurityContext(Uint8List value) {
-    print("Updating security context with certificate authority");
-    SecurityContext.defaultContext.setTrustedCertificatesBytes(value);
   }
 }

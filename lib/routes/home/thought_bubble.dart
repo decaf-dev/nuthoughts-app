@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
 class ThoughtBubble extends StatefulWidget {
-  const ThoughtBubble(this.text, {Key? key}) : super(key: key);
+  const ThoughtBubble(this.text, this.onLongPress, {Key? key})
+      : super(key: key);
 
+  final Function() onLongPress;
   final String text;
 
   @override
@@ -30,7 +32,7 @@ class _ThoughtBubbleState extends State<ThoughtBubble> {
             child: InkWell(
                 borderRadius: BorderRadius.circular(15),
                 onTap: () {},
-                onLongPress: () {},
+                onLongPress: widget.onLongPress,
                 child: Ink(
                   width: maxWidth,
                   padding:

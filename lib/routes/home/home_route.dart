@@ -17,6 +17,8 @@ class HomeRoute extends StatefulWidget {
 class _HomeRouteState extends State<HomeRoute> {
   final AppController controller = Get.find();
 
+  int? actionBarThoughtId;
+
   @override
   void initState() {
     super.initState();
@@ -32,28 +34,48 @@ class _HomeRouteState extends State<HomeRoute> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-        actions: [
-          IconButton(
-              icon: const Icon(
-                Icons.sync,
-                color: Colors.white,
-              ),
-              onPressed: () {
-                controller.syncThoughts();
-              }),
-          IconButton(
-              icon: const Icon(
-                Icons.settings,
-                color: Colors.white,
-              ),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const SettingsRoute()),
-                );
-              }),
-        ],
+        actions: actionBarThoughtId != null
+            ? [
+                IconButton(
+                  icon: const Icon(Icons.restore),
+                  onPressed: () async {
+                    await controller.restoreThought(actionBarThoughtId!);
+                    setState(() {
+                      actionBarThoughtId = null;
+                    });
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () {
+                    setState(() {
+                      actionBarThoughtId = null;
+                    });
+                  },
+                ),
+              ]
+            : [
+                IconButton(
+                    icon: const Icon(
+                      Icons.sync,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {
+                      controller.syncThoughts();
+                    }),
+                IconButton(
+                    icon: const Icon(
+                      Icons.settings,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const SettingsRoute()),
+                      );
+                    }),
+              ],
       ),
       body: Column(children: [
         _lastSynced(),
@@ -63,12 +85,18 @@ class _HomeRouteState extends State<HomeRoute> {
               itemBuilder: (context, index) {
                 return Align(
                   alignment: Alignment.centerRight,
-                  child: ThoughtBubble(controller.savedThoughts[index].text),
+                  child:
+                      ThoughtBubble(controller.savedThoughts[index].text, () {
+                    setState(() {
+                      actionBarThoughtId = controller.savedThoughts[index].id;
+                    });
+                  }),
                 );
               },
               itemCount: controller.savedThoughts.length,
             ))),
-        MessageInput(controller.saveText, (String text) {
+        MessageInput(controller.textController, controller.saveText,
+            (String text) {
           controller.saveThought(text);
           controller.saveText("");
         }),
