@@ -132,6 +132,12 @@ class AppController extends GetxController {
     savedThoughts.refresh();
   }
 
+  Future<void> deleteThought(int id) async {
+    await SQLData.deleteThought(id);
+    savedThoughts.removeWhere((el) => el.id == id);
+    savedThoughts.refresh();
+  }
+
   Future<void> _pruneOldThoughts() async {
     List<Thought> thoughts = await SQLData.listThoughts();
 

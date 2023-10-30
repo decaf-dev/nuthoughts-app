@@ -58,10 +58,13 @@ class _HomeRouteState extends State<HomeRoute> {
                   },
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close),
+                  icon: const Icon(Icons.delete),
                   onPressed: () {
-                    setState(() {
-                      actionBarThoughtId = null;
+                    showConfirmationDialog(context, "Delete thought", () async {
+                      await controller.deleteThought(actionBarThoughtId!);
+                      setState(() {
+                        actionBarThoughtId = null;
+                      });
                     });
                   },
                 ),
