@@ -82,8 +82,6 @@ class _HomeRouteState extends State<HomeRoute> {
               ],
       ),
       body: Column(children: [
-        _lastSynced(),
-        const SizedBox(height: 10),
         Obx(() => Expanded(
                 child: ListView.builder(
               itemBuilder: (context, index) {
@@ -106,18 +104,5 @@ class _HomeRouteState extends State<HomeRoute> {
         }),
       ]),
     );
-  }
-
-  Widget _lastSynced() {
-    return (Container(
-        color: Colors.deepPurple,
-        padding: const EdgeInsets.all(10),
-        child: Obx(() => Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text("Last sync: ${controller.syncTime.syncString}",
-                    style: const TextStyle(color: Colors.white))
-              ],
-            ))));
   }
 }
