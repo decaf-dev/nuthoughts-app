@@ -48,6 +48,7 @@ class AppController extends GetxController {
       //Attempt to sync every thought
       List<bool> result = await Future.wait(
           thoughtsToSave.map((thought) => _thoughtPost(thought)));
+      savedThoughts.refresh();
     }
   }
 
@@ -61,14 +62,6 @@ class AppController extends GetxController {
 
     savedThoughts.add(thought);
     savedThoughts.refresh();
-    // bool wasSuccessful = await _thoughtPost(thought);
-
-    // if (wasSuccessful) {
-    //   syncTime.updateSyncTime();
-    //   //Restart the time. This is because the sync time needs to update exactly
-    //   //1 minute from the last successful sync. Otherwise it will be out off by a few seconds
-    //   syncTime.restartTimer();
-    // }
   }
 
   Future<void> saveIpAddress(String value) async {
