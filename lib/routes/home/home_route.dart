@@ -87,12 +87,24 @@ class _HomeRouteState extends State<HomeRoute> {
               itemBuilder: (context, index) {
                 return Align(
                   alignment: Alignment.centerRight,
-                  child:
-                      ThoughtBubble(controller.savedThoughts[index].text, () {
-                    setState(() {
-                      actionBarThoughtId = controller.savedThoughts[index].id;
-                    });
-                  }),
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        ThoughtBubble(controller.savedThoughts[index].text, () {
+                          setState(() {
+                            actionBarThoughtId =
+                                controller.savedThoughts[index].id;
+                          });
+                        }),
+                        if (controller.savedThoughts[index]
+                            .hasBeenSavedOnServer()) ...[
+                          const Padding(
+                              padding: EdgeInsets.fromLTRB(0, 0, 20, 15),
+                              child: Text("Saved",
+                                  style: TextStyle(
+                                      color: Colors.white70, fontSize: 12))),
+                        ]
+                      ]),
                 );
               },
               itemCount: controller.savedThoughts.length,
