@@ -99,10 +99,14 @@ class _HomeRouteState extends State<HomeRoute> {
                         if (controller.savedThoughts[index]
                             .hasBeenSavedOnServer()) ...[
                           const Padding(
-                              padding: EdgeInsets.fromLTRB(0, 0, 20, 15),
+                              padding: EdgeInsets.fromLTRB(0, 5, 20, 15),
                               child: Text("Saved",
                                   style: TextStyle(
                                       color: Colors.white70, fontSize: 12))),
+                        ],
+                        if (!controller.savedThoughts[index]
+                            .hasBeenSavedOnServer()) ...[
+                          const SizedBox(height: 15),
                         ]
                       ]),
                 );

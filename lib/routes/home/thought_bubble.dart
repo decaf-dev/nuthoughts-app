@@ -28,7 +28,7 @@ class _ThoughtBubbleState extends State<ThoughtBubble> {
             : textPainter.width + 30; // Adding 30 for padding
 
         return Container(
-            margin: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
             child: InkWell(
                 borderRadius: BorderRadius.circular(15),
                 onTap: () {},
