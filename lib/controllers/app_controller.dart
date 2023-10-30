@@ -15,8 +15,6 @@ class AppController extends GetxController {
   final ipAddress = ''.obs;
   final port = ''.obs;
 
-  Timer? _reconnectionTimer;
-
   late SharedPreferences _prefs;
   TextEditingController textController = TextEditingController();
   GlobalKey scaffoldKey = GlobalKey();
@@ -36,12 +34,6 @@ class AppController extends GetxController {
     await _pruneOldThoughts();
 
     super.onInit();
-  }
-
-  @override
-  void dispose() {
-    _reconnectionTimer?.cancel();
-    super.dispose();
   }
 
   Future<void> syncThoughts() async {
