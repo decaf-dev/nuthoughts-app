@@ -35,7 +35,15 @@ class _HomeRouteState extends State<HomeRoute> {
     return Scaffold(
       key: controller.scaffoldKey,
       appBar: AppBar(
-        title: Text(widget.title),
+        title: actionBarThoughtId != null
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () async {
+                  setState(() {
+                    actionBarThoughtId = null;
+                  });
+                })
+            : Text(widget.title),
         actions: actionBarThoughtId != null
             ? [
                 IconButton(
