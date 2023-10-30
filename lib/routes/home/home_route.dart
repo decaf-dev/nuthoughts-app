@@ -111,11 +111,10 @@ class _HomeRouteState extends State<HomeRoute> {
               ],
       ),
       body: Column(children: [
-        const SizedBox(height: 20),
+        const SizedBox(height: 15),
         Obx(() => Expanded(
                 child: ListView.builder(
               controller: scrollController,
-              physics: ClampingScrollPhysics(),
               itemBuilder: (context, index) {
                 return Align(
                   alignment: Alignment.centerRight,
