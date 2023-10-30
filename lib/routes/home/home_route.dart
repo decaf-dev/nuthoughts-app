@@ -1,4 +1,6 @@
 import 'package:nuthoughts/controllers/app_controller.dart';
+import 'package:nuthoughts/routes/home/app_title.dart';
+import 'package:nuthoughts/routes/home/saved_display.dart';
 import 'package:nuthoughts/routes/home/thought_bubble.dart';
 import 'package:nuthoughts/routes/settings/settings_route.dart';
 import 'package:flutter/material.dart';
@@ -17,8 +19,9 @@ class HomeRoute extends StatefulWidget {
 
 class _HomeRouteState extends State<HomeRoute> {
   final AppController controller = Get.find();
+  final ScrollController scrollController = ScrollController();
 
-  int? actionBarThoughtId;
+  int? selectedThoughtId;
 
   @override
   void initState() {
@@ -27,6 +30,7 @@ class _HomeRouteState extends State<HomeRoute> {
 
   @override
   void dispose() {
+    scrollController.dispose();
     super.dispose();
   }
 
@@ -35,24 +39,24 @@ class _HomeRouteState extends State<HomeRoute> {
     return Scaffold(
       key: controller.scaffoldKey,
       appBar: AppBar(
-        title: actionBarThoughtId != null
-            ? IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () async {
-                  setState(() {
-                    actionBarThoughtId = null;
-                  });
-                })
-            : Text(widget.title),
-        actions: actionBarThoughtId != null
+        title: AppTitle(
+          widget.title,
+          selectedThoughtId,
+          () {
+            setState(() {
+              selectedThoughtId = null;
+            });
+          },
+        ),
+        actions: selectedThoughtId != null
             ? [
                 IconButton(
                   icon: const Icon(Icons.restore),
                   onPressed: () async {
                     showConfirmationDialog(context, "Undo thought", () async {
-                      await controller.restoreThought(actionBarThoughtId!);
+                      await controller.restoreThought(selectedThoughtId!);
                       setState(() {
-                        actionBarThoughtId = null;
+                        selectedThoughtId = null;
                       });
                     });
                   },
@@ -61,9 +65,9 @@ class _HomeRouteState extends State<HomeRoute> {
                   icon: const Icon(Icons.delete),
                   onPressed: () {
                     showConfirmationDialog(context, "Delete thought", () async {
-                      await controller.deleteThought(actionBarThoughtId!);
+                      await controller.deleteThought(selectedThoughtId!);
                       setState(() {
-                        actionBarThoughtId = null;
+                        selectedThoughtId = null;
                       });
                     });
                   },
@@ -104,18 +108,12 @@ class _HomeRouteState extends State<HomeRoute> {
                       children: [
                         ThoughtBubble(controller.savedThoughts[index].text, () {
                           setState(() {
-                            actionBarThoughtId =
+                            selectedThoughtId =
                                 controller.savedThoughts[index].id;
                           });
                         }),
                         if (controller.savedThoughts[index]
-                            .hasBeenSavedOnServer()) ...[
-                          const Padding(
-                              padding: EdgeInsets.fromLTRB(0, 5, 20, 15),
-                              child: Text("Saved",
-                                  style: TextStyle(
-                                      color: Colors.white70, fontSize: 12))),
-                        ],
+                            .hasBeenSavedOnServer()) ...[const SavedDisplay()],
                         if (!controller.savedThoughts[index]
                             .hasBeenSavedOnServer()) ...[
                           const SizedBox(height: 15),
