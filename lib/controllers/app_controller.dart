@@ -6,14 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:nuthoughts/constants.dart' as constants;
 import 'package:nuthoughts/controllers/sql_data.dart';
 import 'package:nuthoughts/models/thought.dart';
-import 'package:nuthoughts/models/sync_time.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppController extends GetxController {
   final savedThoughts = <Thought>[].obs;
-  final syncTime = SyncTime();
   final ipAddress = ''.obs;
   final port = ''.obs;
 
@@ -37,15 +35,11 @@ class AppController extends GetxController {
 
     await _pruneOldThoughts();
 
-    //Start the timer to update the sync time string
-    syncTime.startTimer();
-
     super.onInit();
   }
 
   @override
   void dispose() {
-    syncTime.dispose();
     _reconnectionTimer?.cancel();
     super.dispose();
   }
@@ -62,14 +56,6 @@ class AppController extends GetxController {
       //Attempt to sync every thought
       List<bool> result = await Future.wait(
           thoughtsToSave.map((thought) => _thoughtPost(thought)));
-
-      //If one thought was successful, update the sync time
-      if (result.any((val) => val == true)) {
-        syncTime.updateSyncTime();
-        //Restart the time. This is because the sync time needs to update exactly
-        //1 minute from the last successful sync. Otherwise it will be out off by a few seconds
-        syncTime.restartTimer();
-      }
     }
   }
 
