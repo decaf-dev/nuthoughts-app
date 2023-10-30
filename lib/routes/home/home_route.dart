@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:nuthoughts/controllers/app_controller.dart';
 import 'package:nuthoughts/models/thought.dart';
 import 'package:nuthoughts/routes/home/app_title.dart';
@@ -21,17 +23,25 @@ class HomeRoute extends StatefulWidget {
 class _HomeRouteState extends State<HomeRoute> {
   final AppController controller = Get.find();
   final ScrollController scrollController = ScrollController();
-
+  late StreamSubscription savedThoughtsSubscription;
   Thought? selectedThought;
 
   @override
-  void initState() {
+  initState() {
     super.initState();
+    savedThoughtsSubscription = controller.savedThoughts.listen((value) {
+      scrollController.jumpTo(
+        scrollController.position.maxScrollExtent,
+        // duration: const Duration(milliseconds: 300),
+        // curve: Curves.easeOut,
+      );
+    });
   }
 
   @override
   void dispose() {
     scrollController.dispose();
+    savedThoughtsSubscription.cancel();
     super.dispose();
   }
 
@@ -101,9 +111,11 @@ class _HomeRouteState extends State<HomeRoute> {
               ],
       ),
       body: Column(children: [
-        const SizedBox(height: 10),
+        const SizedBox(height: 20),
         Obx(() => Expanded(
                 child: ListView.builder(
+              controller: scrollController,
+              physics: ClampingScrollPhysics(),
               itemBuilder: (context, index) {
                 return Align(
                   alignment: Alignment.centerRight,
