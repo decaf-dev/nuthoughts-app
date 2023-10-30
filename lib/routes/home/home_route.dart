@@ -82,6 +82,7 @@ class _HomeRouteState extends State<HomeRoute> {
               ],
       ),
       body: Column(children: [
+        const SizedBox(height: 10),
         Obx(() => Expanded(
                 child: ListView.builder(
               itemBuilder: (context, index) {
