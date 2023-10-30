@@ -48,6 +48,8 @@ class _MessageInputState extends State<MessageInput> {
             child: Row(
               children: <Widget>[
                 Expanded(
+                    child: Padding(
+                  padding: const EdgeInsets.only(left: 8),
                   child: TextField(
                     autofocus: true,
                     minLines: 1,
@@ -62,7 +64,7 @@ class _MessageInputState extends State<MessageInput> {
                       widget.onChanged(widget.textController.text);
                     },
                   ),
-                ),
+                )),
                 IconButton(
                   icon: const Icon(Icons.send),
                   color: Colors.blueAccent,
