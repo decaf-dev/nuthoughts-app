@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/services.dart';
 import 'package:nuthoughts/controllers/app_controller.dart';
 import 'package:nuthoughts/models/thought.dart';
 import 'package:nuthoughts/routes/home/app_title.dart';
@@ -61,6 +62,20 @@ class _HomeRouteState extends State<HomeRoute> {
         ),
         actions: selectedThought != null
             ? [
+                IconButton(
+                    icon: const Icon(Icons.copy),
+                    onPressed: () async {
+                      Clipboard.setData(
+                          ClipboardData(text: selectedThought!.text));
+
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Thought copied to clipboard"),
+                          backgroundColor: Colors.blueAccent,
+                        ),
+                      );
+                    }),
                 if (!selectedThought!.hasBeenSavedOnServer()) ...[
                   IconButton(
                     icon: const Icon(Icons.restore),
