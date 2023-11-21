@@ -31,11 +31,13 @@ class _HomeRouteState extends State<HomeRoute> {
   initState() {
     super.initState();
     savedThoughtsSubscription = controller.savedThoughts.listen((value) {
-      scrollController.jumpTo(
-        scrollController.position.maxScrollExtent,
-        // duration: const Duration(milliseconds: 300),
-        // curve: Curves.easeOut,
-      );
+      Future.delayed(const Duration(milliseconds: 10), () {
+        scrollController.animateTo(
+          scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOut,
+        );
+      });
     });
   }
 
