@@ -8,6 +8,7 @@ import 'package:nuthoughts/controllers/sql_data.dart';
 import 'package:nuthoughts/models/thought.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:nuthoughts/utils/snackbar_utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppController extends GetxController {
@@ -150,26 +151,17 @@ class AppController extends GetxController {
       return false;
     } on HandshakeException catch (err) {
       print(err);
-      const SnackBar snackBar = SnackBar(
-        backgroundColor: Colors.red,
-        content: Text("Handshake error. Check certificate authority"),
-      );
-      ScaffoldMessenger.of(scaffoldKey.currentContext!).showSnackBar(snackBar);
+      displayErrorSnackBar(scaffoldKey.currentContext!,
+          "Handshake error. Check certificate authority");
       return false;
     } on SocketException catch (err) {
       print(err);
-      const SnackBar snackBar = SnackBar(
-        backgroundColor: Colors.red,
-        content: Text(
-            "Socket error. Check IP address and port.\nIs the server running?"),
-      );
-      ScaffoldMessenger.of(scaffoldKey.currentContext!).showSnackBar(snackBar);
+      displayErrorSnackBar(scaffoldKey.currentContext!,
+          "Socket error. Check IP address and port.\nIs the server running?");
       return false;
     } catch (err) {
       print(err);
-      const SnackBar snackBar = SnackBar(
-          backgroundColor: Colors.red, content: Text("Unhandled exception"));
-      ScaffoldMessenger.of(scaffoldKey.currentContext!).showSnackBar(snackBar);
+      displayErrorSnackBar(scaffoldKey.currentContext!, "Unhandled exception");
       return false;
     }
   }
