@@ -47,8 +47,29 @@ class AppController extends GetxController {
     //Only preform the action if not empty
     if (thoughtsToSave.isNotEmpty) {
       //Attempt to sync every thought
-      List<bool> result = await Future.wait(
-          thoughtsToSave.map((thought) => _thoughtPost(thought)));
+      // List<bool> result = await Future.wait(
+      //     thoughtsToSave.map((thought) => _thoughtPost(thought)));
+
+      for (Thought thought in thoughtsToSave) {
+        try {
+          await _thoughtPost(thought);
+        } on HandshakeException catch (err) {
+          print(err);
+          displayErrorSnackBar(scaffoldKey.currentContext!,
+              "Handshake error. Check certificate authority");
+          break;
+        } on SocketException catch (err) {
+          print(err);
+          displayErrorSnackBar(scaffoldKey.currentContext!,
+              "Socket error. Cannot connect to server.\nCheck IP address and port.\nIs the server running?");
+          break;
+        } catch (err) {
+          print(err);
+          displayErrorSnackBar(
+              scaffoldKey.currentContext!, "Unhandled exception");
+          break;
+        }
+      }
       savedThoughts.refresh();
     }
   }
@@ -132,37 +153,19 @@ class AppController extends GetxController {
   ///Posts a thought to server
   ///Return true if receives 201
   ///Otherwise returns false
-  Future<bool> _thoughtPost(Thought thought) async {
-    try {
-      print("POST https://${ipAddress.value}:${port.value}/thought");
-      print(thought.toString());
-      final response = await http
-          .post(Uri.parse('https://${ipAddress.value}:${port.value}/thought'),
-              headers: <String, String>{
-                'Content-Type': 'application/json; charset=UTF-8',
-              },
-              body: thought.toJson())
-          .timeout(const Duration(seconds: 10));
-      if (response.statusCode == 201) {
-        thought.savedOnServer();
-        await SQLData.updateThought(thought);
-        return true;
-      }
-      return false;
-    } on HandshakeException catch (err) {
-      print(err);
-      displayErrorSnackBar(scaffoldKey.currentContext!,
-          "Handshake error. Check certificate authority");
-      return false;
-    } on SocketException catch (err) {
-      print(err);
-      displayErrorSnackBar(scaffoldKey.currentContext!,
-          "Socket error. Check IP address and port.\nIs the server running?");
-      return false;
-    } catch (err) {
-      print(err);
-      displayErrorSnackBar(scaffoldKey.currentContext!, "Unhandled exception");
-      return false;
+  Future<void> _thoughtPost(Thought thought) async {
+    print("POST https://${ipAddress.value}:${port.value}/thought");
+    print(thought.toString());
+    final response = await http
+        .post(Uri.parse('https://${ipAddress.value}:${port.value}/thought'),
+            headers: <String, String>{
+              'Content-Type': 'application/json; charset=UTF-8',
+            },
+            body: thought.toJson())
+        .timeout(const Duration(seconds: 10));
+    if (response.statusCode == 201) {
+      thought.savedOnServer();
+      await SQLData.updateThought(thought);
     }
   }
 }
