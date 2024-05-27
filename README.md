@@ -16,7 +16,7 @@ This app was scaffolded using Flutter v3.7.6. Please make sure you at least use 
 
 Follow the installation and usage instructions for setting up your own NuThoughts server
 
-- https://github.com/trey-wallis/nuthoughts-server
+- https://github.com/decaf-dev/nuthoughts-server
 
 ## Usage
 
