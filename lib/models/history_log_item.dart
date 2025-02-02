@@ -17,27 +17,6 @@ class HistoryLogItem {
         eventType = HistoryLogEvent.values.byName(map['eventType']),
         payload = map['payload'];
 
-  ///Converts a thought to a map that can be saved in the database
-  Map<String, dynamic> toMap() {
-    return {
-      'createdOn': createdOn,
-      'eventType': eventType.name,
-      'payload': payload,
-    };
-  }
-
-  eventTypeString() {
-    if (eventType == HistoryLogEvent.addThought) {
-      return "Thought Added";
-    } else if (eventType == HistoryLogEvent.deleteThought) {
-      return "Thought Deleted";
-    } else if (eventType == HistoryLogEvent.editThought) {
-      return "Thought Edited";
-    } else {
-      return "Unknown";
-    }
-  }
-
   @override
   String toString() {
     return 'HistoryLogItem{id: $id, createdOn: $createdOn, eventType: $eventType, payload: $payload}';
