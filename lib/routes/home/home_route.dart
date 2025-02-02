@@ -64,6 +64,7 @@ class _HomeRouteState extends State<HomeRoute> {
     return Scaffold(
       key: controller.scaffoldKey,
       appBar: AppBar(
+        key: ValueKey(controller.themeMode.value),
         title: AppTitle(
           widget.title,
           selectedThought?.id,
