@@ -5,7 +5,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
+import 'package:http/io_client.dart';
 import 'package:nuthoughts/constants.dart' as constants;
 import 'package:nuthoughts/constants.dart';
 import 'package:nuthoughts/controllers/persisted_storage.dart';
@@ -25,6 +25,8 @@ class AppController extends GetxController {
   final GlobalKey scaffoldKey = GlobalKey();
 
   int currentHistoryItemIndex = -1.obs;
+  IOClient? ioClient;
+
   late SharedPreferences _prefs;
 
   @override
@@ -37,7 +39,7 @@ class AppController extends GetxController {
 
     Uint8List? caData = await PersistedStorage.getCertificateAuthority();
     if (caData != null) {
-      _updateSecurityContext(caData);
+      _loadCertificateAuthority(caData);
     }
 
     await _pruneOldThoughts();
@@ -59,17 +61,21 @@ class AppController extends GetxController {
         .where((thought) => thought.hasBeenSavedOnServer() == false)
         .toList();
 
-    //Only preform the action if not empty
-    if (thoughtsToSave.isNotEmpty) {
-      //Attempt to sync every thought
+    IOClient? ioClient = this.ioClient;
+    if (ioClient == null) {
+      displayErrorSnackBar(scaffoldKey.currentContext!,
+          "No certificate authority found. Please set one in settings.");
+      return;
+    }
 
+    if (thoughtsToSave.isNotEmpty) {
       for (Thought thought in thoughtsToSave) {
         try {
-          await _thoughtPost(thought);
+          await _postThought(ioClient, thought);
         } on HandshakeException catch (err) {
           print(err);
           displayErrorSnackBar(scaffoldKey.currentContext!,
-              "Handshake error. Check certificate authority");
+              "Handshake error. Invalid certificate authority");
           break;
         } on SocketException catch (err) {
           print(err);
@@ -153,21 +159,23 @@ class AppController extends GetxController {
   }
 
   Future<void> saveCertificateAuthority(Uint8List value) async {
+    print("saveCertificateAuthority");
     await PersistedStorage.insertCertificateAuthority(value);
-    _updateSecurityContext(value);
+    _loadCertificateAuthority(value);
   }
 
-  void _updateSecurityContext(Uint8List value) {
-    // String string = String.fromCharCodes(value);
-    // print(string);
+  void _loadCertificateAuthority(Uint8List value) {
+    ioClient?.close();
 
-    //TODO there was a bug where changing from an invalid to a new certificate
-    //wasn't updating. Does this function update?
+    //Create a new context with the trusted certificate
+    SecurityContext newContext = SecurityContext();
+    newContext.setTrustedCertificatesBytes(value);
 
-    //If you load a invalid certificate into memory
-    //and then load a valid one
-    //this doesn't work
-    SecurityContext.defaultContext.setTrustedCertificatesBytes(value);
+    //Create a new IOClient with the new context
+    HttpClient client = HttpClient(context: newContext)
+      ..connectionTimeout =
+          const Duration(seconds: constants.httpTimeoutSeconds);
+    ioClient = IOClient(client);
   }
 
   Future<void> deleteThought(int id) async {
@@ -198,16 +206,16 @@ class AppController extends GetxController {
   ///Posts a thought to server
   ///Return true if receives 201
   ///Otherwise returns false
-  Future<void> _thoughtPost(Thought thought) async {
+  Future<void> _postThought(IOClient ioClient, Thought thought) async {
     print("POST https://${ipAddress.value}:${port.value}/thought");
-    print(thought.toString());
-    final response = await http
-        .post(Uri.parse('https://${ipAddress.value}:${port.value}/thought'),
-            headers: <String, String>{
-              'Content-Type': 'application/json; charset=UTF-8',
-            },
-            body: thought.toJson())
-        .timeout(const Duration(seconds: 3));
+    print(thought);
+    final response = await ioClient.post(
+        Uri.parse('https://${ipAddress.value}:${port.value}/thought'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: thought.toJson());
+
     if (response.statusCode == 201) {
       thought.savedOnServer();
       await PersistedStorage.updateThought(thought);
