@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nuthoughts/controllers/app_controller.dart';
+import 'package:nuthoughts/utils/snackbar_utils.dart';
 import 'package:settings_ui/settings_ui.dart';
 
 class SettingsRoute extends StatefulWidget {
@@ -62,11 +63,8 @@ class _SettingsRouteState extends State<SettingsRoute> {
                         await controller.saveCertificateAuthority(data);
 
                         if (!context.mounted) return;
-                        const SnackBar snackBar = SnackBar(
-                          backgroundColor: Colors.green,
-                          content: Text('Certificate authority saved'),
-                        );
-                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                        showSnackBar(context, SnackBarType.success,
+                            'Certificate authority saved');
                       }
                     },
                   ),

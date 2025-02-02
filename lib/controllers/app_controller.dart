@@ -62,7 +62,7 @@ class AppController extends GetxController {
 
     IOClient? ioClient = this.ioClient;
     if (ioClient == null) {
-      displayErrorSnackBar(scaffoldKey.currentContext!,
+      showSnackBar(scaffoldKey.currentContext!, SnackBarType.error,
           "No certificate authority found. Please set one in settings.");
       return;
     }
@@ -72,16 +72,16 @@ class AppController extends GetxController {
         try {
           await _postThought(ioClient, thought);
         } on HandshakeException catch (_) {
-          displayErrorSnackBar(scaffoldKey.currentContext!,
+          showSnackBar(scaffoldKey.currentContext!, SnackBarType.error,
               "Handshake error. Invalid certificate authority");
           break;
         } on SocketException catch (_) {
-          displayErrorSnackBar(
-              scaffoldKey.currentContext!, "Error connecting to server");
+          showSnackBar(scaffoldKey.currentContext!, SnackBarType.error,
+              "Error connecting to server");
           break;
         } catch (_) {
-          displayErrorSnackBar(
-              scaffoldKey.currentContext!, "Unhandled exception");
+          showSnackBar(scaffoldKey.currentContext!, SnackBarType.error,
+              "Unhandled exception");
           break;
         }
       }

@@ -13,6 +13,7 @@ import 'package:nuthoughts/routes/home/message_input.dart';
 import 'package:nuthoughts/routes/home/saved_display.dart';
 import 'package:nuthoughts/routes/home/thought_bubble.dart';
 import 'package:nuthoughts/routes/settings/settings_route.dart';
+import 'package:nuthoughts/utils/snackbar_utils.dart';
 import 'package:nuthoughts/widgets/confirmation.dart';
 
 class HomeRoute extends StatefulWidget {
@@ -97,12 +98,8 @@ class _HomeRouteState extends State<HomeRoute> {
                             ClipboardData(text: selectedThought!.text));
 
                         if (!context.mounted) return;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Thought copied to clipboard"),
-                            backgroundColor: Colors.blueAccent,
-                          ),
-                        );
+                        showSnackBar(context, SnackBarType.info,
+                            'Thought copied to clipboard');
                       }),
                 if (!selectedThought!.hasBeenSavedOnServer() && !isEditing)
                   IconButton(
