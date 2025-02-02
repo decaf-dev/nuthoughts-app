@@ -58,7 +58,6 @@ class _SettingsRouteState extends State<SettingsRoute> {
 
                       if (result != null) {
                         File file = File(result.files.single.path!);
-                        print(file.path);
                         Uint8List data = await file.readAsBytes();
                         await controller.saveCertificateAuthority(data);
 
@@ -85,19 +84,33 @@ class _SettingsRouteState extends State<SettingsRoute> {
         builder: (context) {
           return AlertDialog(
             title: Text(title),
-            content: TextField(controller: textController, autofocus: true),
+            content: TextField(
+              cursorColor: Theme.of(context).colorScheme.onPrimary,
+              controller: textController,
+              autofocus: true,
+              decoration: InputDecoration(
+                  border: const OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(25)),
+                  ),
+                  filled: true,
+                  fillColor: Theme.of(context).colorScheme.secondary),
+            ),
             actions: <Widget>[
               TextButton(
                   onPressed: () {
                     _dismissDialog();
                   },
-                  child: const Text('Close')),
+                  child: Text('Close',
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.onPrimary))),
               TextButton(
                 onPressed: () {
                   onSave(textController.text);
                   _dismissDialog();
                 },
-                child: const Text('Save'),
+                child: Text('Save',
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.onPrimary)),
               )
             ],
           );

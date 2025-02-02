@@ -55,7 +55,6 @@ class AppController extends GetxController {
   }
 
   Future<void> syncThoughts() async {
-    print("Syncing thoughts");
     //Get the thoughts that haven't been saved
     List<Thought> thoughtsToSave = savedThoughts
         .where((thought) => thought.hasBeenSavedOnServer() == false)
@@ -72,18 +71,15 @@ class AppController extends GetxController {
       for (Thought thought in thoughtsToSave) {
         try {
           await _postThought(ioClient, thought);
-        } on HandshakeException catch (err) {
-          print(err);
+        } on HandshakeException catch (_) {
           displayErrorSnackBar(scaffoldKey.currentContext!,
               "Handshake error. Invalid certificate authority");
           break;
-        } on SocketException catch (err) {
-          print(err);
+        } on SocketException catch (_) {
           displayErrorSnackBar(
               scaffoldKey.currentContext!, "Error connecting to server");
           break;
-        } catch (err) {
-          print(err);
+        } catch (_) {
           displayErrorSnackBar(
               scaffoldKey.currentContext!, "Unhandled exception");
           break;
@@ -96,7 +92,6 @@ class AppController extends GetxController {
   Future<void> addHistoryItem(
       constants.HistoryLogEvent eventType, String text) async {
     final HistoryLogItem item = HistoryLogItem(eventType, text);
-    print(item);
 
     historyLog.add(item);
     historyLog.refresh();
@@ -159,7 +154,6 @@ class AppController extends GetxController {
   }
 
   Future<void> saveCertificateAuthority(Uint8List value) async {
-    print("saveCertificateAuthority");
     await PersistedStorage.insertCertificateAuthority(value);
     _loadCertificateAuthority(value);
   }
@@ -207,8 +201,6 @@ class AppController extends GetxController {
   ///Return true if receives 201
   ///Otherwise returns false
   Future<void> _postThought(IOClient ioClient, Thought thought) async {
-    print("POST https://${ipAddress.value}:${port.value}/thought");
-    print(thought);
     final response = await ioClient.post(
         Uri.parse('https://${ipAddress.value}:${port.value}/thought'),
         headers: <String, String>{
@@ -220,8 +212,6 @@ class AppController extends GetxController {
       thought.savedOnServer();
       await PersistedStorage.updateThought(thought);
     } else {
-      print(response.statusCode);
-      print(response.body);
       throw Exception('Failed to post thought');
     }
   }

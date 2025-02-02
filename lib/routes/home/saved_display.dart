@@ -5,9 +5,11 @@ class SavedDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-        padding: EdgeInsets.fromLTRB(0, 5, 20, 15),
+    return Padding(
+        padding: const EdgeInsets.fromLTRB(0, 5, 20, 15),
         child: Text("Saved",
-            style: TextStyle(color: Colors.white70, fontSize: 12)));
+            style: TextStyle(
+                color: Theme.of(context).colorScheme.onSecondary,
+                fontSize: 12)));
   }
 }

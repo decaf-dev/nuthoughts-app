@@ -82,11 +82,16 @@ class _HomeRouteState extends State<HomeRoute> {
             }
           },
         ),
+        shape: Border(
+            bottom: BorderSide(
+          color: Theme.of(context).colorScheme.outline,
+          width: 2,
+        )),
         actions: selectedThought != null
             ? [
                 if (!isEditing)
                   IconButton(
-                      icon: const Icon(Icons.copy),
+                      icon: const Icon(Icons.copy_outlined),
                       onPressed: () async {
                         Clipboard.setData(
                             ClipboardData(text: selectedThought!.text));
@@ -101,7 +106,7 @@ class _HomeRouteState extends State<HomeRoute> {
                       }),
                 if (!selectedThought!.hasBeenSavedOnServer() && !isEditing)
                   IconButton(
-                      icon: const Icon(Icons.edit),
+                      icon: const Icon(Icons.edit_outlined),
                       onPressed: () async {
                         await controller
                             .updateMessageInput(selectedThought!.text);
@@ -111,7 +116,7 @@ class _HomeRouteState extends State<HomeRoute> {
                       }),
                 if (!selectedThought!.hasBeenSavedOnServer() && !isEditing)
                   IconButton(
-                    icon: const Icon(Icons.delete),
+                    icon: const Icon(Icons.delete_outline),
                     onPressed: () {
                       showConfirmationDialog(context, "Delete Thought",
                           () async {
@@ -130,8 +135,7 @@ class _HomeRouteState extends State<HomeRoute> {
             : [
                 Row(children: [
                   IconButton(
-                    icon: const Icon(Icons.undo),
-                    color: Colors.white,
+                    icon: const Icon(Icons.undo_outlined),
                     onPressed: () async {
                       if (controller.currentHistoryItemIndex < 0) {
                         return;
@@ -146,8 +150,7 @@ class _HomeRouteState extends State<HomeRoute> {
                     },
                   ),
                   IconButton(
-                    icon: const Icon(Icons.redo),
-                    color: Colors.white,
+                    icon: const Icon(Icons.redo_outlined),
                     onPressed: () async {
                       if (controller.currentHistoryItemIndex ==
                           controller.historyLog.length - 1) {
@@ -165,16 +168,14 @@ class _HomeRouteState extends State<HomeRoute> {
                 ]),
                 IconButton(
                     icon: const Icon(
-                      Icons.sync,
-                      color: Colors.white,
+                      Icons.sync_outlined,
                     ),
                     onPressed: () {
                       controller.syncThoughts();
                     }),
                 IconButton(
                     icon: const Icon(
-                      Icons.settings,
-                      color: Colors.white,
+                      Icons.settings_outlined,
                     ),
                     onPressed: () {
                       Navigator.push(
@@ -187,35 +188,44 @@ class _HomeRouteState extends State<HomeRoute> {
       ),
       body: Column(
         children: [
-          const SizedBox(height: 15),
           Obx(() => Expanded(
+              child: Container(
+                  decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.secondary,
+                      border: Border(
+                          bottom: BorderSide(
+                        color: Theme.of(context).colorScheme.outline,
+                        width: 2,
+                      ))),
+                  padding: const EdgeInsets.all(8.0),
                   child: ListView.builder(
-                controller: scrollController,
-                itemBuilder: (context, index) {
-                  return Align(
-                    alignment: Alignment.centerRight,
-                    child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          ThoughtBubble(controller.savedThoughts[index].text,
-                              () {
-                            setState(() {
-                              selectedThought = controller.savedThoughts[index];
-                            });
-                          }),
-                          if (controller.savedThoughts[index]
-                              .hasBeenSavedOnServer()) ...[
-                            const SavedDisplay()
-                          ],
-                          if (!controller.savedThoughts[index]
-                              .hasBeenSavedOnServer()) ...[
-                            const SizedBox(height: 15),
-                          ]
-                        ]),
-                  );
-                },
-                itemCount: controller.savedThoughts.length,
-              ))),
+                    controller: scrollController,
+                    itemBuilder: (context, index) {
+                      return Align(
+                        alignment: Alignment.centerRight,
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              ThoughtBubble(
+                                  controller.savedThoughts[index].text, () {
+                                setState(() {
+                                  selectedThought =
+                                      controller.savedThoughts[index];
+                                });
+                              }),
+                              if (controller.savedThoughts[index]
+                                  .hasBeenSavedOnServer()) ...[
+                                const SavedDisplay()
+                              ],
+                              if (!controller.savedThoughts[index]
+                                  .hasBeenSavedOnServer()) ...[
+                                const SizedBox(height: 15),
+                              ]
+                            ]),
+                      );
+                    },
+                    itemCount: controller.savedThoughts.length,
+                  )))),
           MessageInput(
               isEditing, controller.textController, controller.saveText,
               (String text) async {
