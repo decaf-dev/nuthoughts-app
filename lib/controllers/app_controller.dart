@@ -71,6 +71,14 @@ class AppController extends GetxController {
       for (Thought thought in thoughtsToSave) {
         try {
           await _postThought(ioClient, thought);
+
+          historyLog.removeWhere((el) {
+            if (el.eventType == HistoryLogEvent.editThought) {
+              return Thought.fromJson(jsonDecode(el.payload)).id == thought.id;
+            }
+            return Thought.fromJson(el.payload).id == thought.id;
+          });
+          currentHistoryItemIndex = historyLog.length - 1;
         } on HandshakeException catch (_) {
           showSnackBar(scaffoldKey.currentContext!, SnackBarType.error,
               "Handshake error. Invalid certificate authority");
@@ -79,7 +87,8 @@ class AppController extends GetxController {
           showSnackBar(scaffoldKey.currentContext!, SnackBarType.error,
               "Error connecting to server");
           break;
-        } catch (_) {
+        } catch (err) {
+          print(err);
           showSnackBar(scaffoldKey.currentContext!, SnackBarType.error,
               "Unhandled exception");
           break;
@@ -212,6 +221,8 @@ class AppController extends GetxController {
       thought.savedOnServer();
       await PersistedStorage.updateThought(thought);
     } else {
+      print(response.statusCode);
+      print(response.body);
       throw Exception('Failed to post thought');
     }
   }
