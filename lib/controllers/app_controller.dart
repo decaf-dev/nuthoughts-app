@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -6,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:nuthoughts/constants.dart' as constants;
+import 'package:nuthoughts/constants.dart';
 import 'package:nuthoughts/controllers/persisted_storage.dart';
 import 'package:nuthoughts/models/history_log_item.dart';
 import 'package:nuthoughts/models/thought.dart';
@@ -17,11 +19,12 @@ class AppController extends GetxController {
   final RxList<HistoryLogItem> historyLog = <HistoryLogItem>[].obs;
   final RxString ipAddress = ''.obs;
   final RxString port = ''.obs;
-  int selectedHistoryItemId = -1.obs;
+  final Rx<Thought> selectedThought = Thought("").obs;
 
   final TextEditingController textController = TextEditingController();
   final GlobalKey scaffoldKey = GlobalKey();
 
+  int currentHistoryItemIndex = -1.obs;
   late SharedPreferences _prefs;
 
   @override
@@ -38,19 +41,15 @@ class AppController extends GetxController {
     }
 
     await _pruneOldThoughts();
-    historyLog.value = await PersistedStorage.getHistoryLog();
+    // historyLog.value = await PersistedStorage.getHistoryLog();
+    // currentHistoryItemIndex = historyLog.length - 1;
 
     super.onInit();
   }
 
-  Future<void> selectHistoryItem(int id) {
-    selectedHistoryItemId = id;
-
-    //If you select one that is ahead of the current index, replay each event forward
-    //If you select one that is behind the current index, replay each event backwards
-
-    historyLog.refresh();
-    return Future.value();
+  Future<void> updateMessageInput(String text) async {
+    textController.text = text;
+    await saveText(textController.text);
   }
 
   Future<void> syncThoughts() async {
@@ -91,14 +90,20 @@ class AppController extends GetxController {
   Future<void> addHistoryItem(
       constants.HistoryLogEvent eventType, String text) async {
     final HistoryLogItem item = HistoryLogItem(eventType, text);
-    int id = await PersistedStorage.insertHistoryItem(item);
-    item.id = id;
+    print(item);
 
     historyLog.add(item);
     historyLog.refresh();
+
+    if (eventType == HistoryLogEvent.addThought ||
+        eventType == HistoryLogEvent.editThought) {
+      currentHistoryItemIndex = currentHistoryItemIndex + 1;
+    } else if (eventType == HistoryLogEvent.deleteThought) {
+      currentHistoryItemIndex = currentHistoryItemIndex - 1;
+    }
   }
 
-  Future<void> saveThought(String text) async {
+  Future<Thought> createThought(String text) async {
     //Save the thought
     final Thought thought = Thought(text.trim());
 
@@ -107,6 +112,30 @@ class AppController extends GetxController {
 
     savedThoughts.add(thought);
     savedThoughts.refresh();
+    return thought;
+  }
+
+  Future<Map<String, dynamic>> updateThought(int id, String text) async {
+    int index = savedThoughts.indexWhere((t) => t.id == id);
+    if (index == -1) throw Exception('Thought not found');
+
+    Thought selectedThought = savedThoughts[index];
+
+    Thought updatedThought = Thought.fromMap({
+      'id': selectedThought.id,
+      'text': text,
+      'createdOn': selectedThought.createdOn,
+      'serverSaveTime': selectedThought.serverSaveTime,
+    });
+
+    await PersistedStorage.updateThought(updatedThought);
+    savedThoughts[index] = updatedThought;
+    savedThoughts.refresh();
+
+    return {
+      'old': jsonEncode(selectedThought.toMap()),
+      'new': jsonEncode(updatedThought.toMap()),
+    };
   }
 
   Future<void> saveIpAddress(String value) async {
@@ -135,17 +164,6 @@ class AppController extends GetxController {
     //TODO there was a bug where changing from an invalid to a new certificate
     //wasn't updating. Does this function update?
     SecurityContext.defaultContext.setTrustedCertificatesBytes(value);
-  }
-
-  Future<void> restoreThought(int id) async {
-    Thought thought = savedThoughts.firstWhere((el) => el.id == id);
-    //Update text controller
-    textController.text += thought.text;
-    saveText(textController.text);
-
-    await PersistedStorage.deleteThought(id);
-    savedThoughts.removeWhere((el) => el.id == id);
-    savedThoughts.refresh();
   }
 
   Future<void> deleteThought(int id) async {
@@ -189,6 +207,52 @@ class AppController extends GetxController {
     if (response.statusCode == 201) {
       thought.savedOnServer();
       await PersistedStorage.updateThought(thought);
+    }
+  }
+
+  Future<void> redoHistoryEvent(HistoryLogItem event) async {
+    switch (event.eventType) {
+      case HistoryLogEvent.addThought:
+        Thought thought = Thought.fromJson(event.payload);
+        savedThoughts.add(thought);
+        await PersistedStorage.insertThought(thought, includeId: true);
+        break;
+      case HistoryLogEvent.deleteThought:
+        Thought thought = Thought.fromJson(event.payload);
+        savedThoughts.removeWhere((t) => t.id == thought.id);
+        await PersistedStorage.deleteThought(thought.id);
+        break;
+      case HistoryLogEvent.editThought:
+        Map<String, dynamic> data = jsonDecode(event.payload);
+        Thought newThought = Thought.fromJson(data['new']);
+        int index = savedThoughts.indexWhere((t) => t.id == newThought.id);
+        if (index != -1) {
+          savedThoughts[index] = newThought;
+        }
+        break;
+    }
+  }
+
+  Future<void> undoHistoryEvent(HistoryLogItem event) async {
+    switch (event.eventType) {
+      case HistoryLogEvent.addThought:
+        Thought thought = Thought.fromJson(event.payload);
+        savedThoughts.removeWhere((t) => t.id == thought.id);
+        await PersistedStorage.deleteThought(thought.id);
+        break;
+      case HistoryLogEvent.deleteThought:
+        Thought thought = Thought.fromJson(event.payload);
+        savedThoughts.add(thought);
+        await PersistedStorage.insertThought(thought, includeId: true);
+        break;
+      case HistoryLogEvent.editThought:
+        Map<String, dynamic> data = jsonDecode(event.payload);
+        Thought oldThought = Thought.fromJson(data['old']);
+        int index = savedThoughts.indexWhere((t) => t.id == oldThought.id);
+        if (index != -1) {
+          savedThoughts[index] = oldThought;
+        }
+        break;
     }
   }
 }

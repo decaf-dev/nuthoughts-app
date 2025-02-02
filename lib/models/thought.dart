@@ -17,15 +17,17 @@ class Thought {
     }
   }
 
-  Thought.fromDatabase(Map<String, dynamic> map)
+  Thought.fromJson(String jsonString) : this.fromMap(jsonDecode(jsonString));
+
+  Thought.fromMap(Map<String, dynamic> map)
       : id = map['id'],
         text = map['text'],
         createdOn = map['createdOn'],
         serverSaveTime = map['serverSaveTime'];
 
-  ///Converts a thought to a map that can be saved in the database
   Map<String, dynamic> toMap() {
     return {
+      'id': id,
       'createdOn': createdOn,
       'text': text,
       'serverSaveTime': serverSaveTime

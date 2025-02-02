@@ -14,14 +14,14 @@ class HistoryLogItem {
   HistoryLogItem.fromDatabase(Map<String, dynamic> map)
       : id = map['id'],
         createdOn = map['createdOn'],
-        eventType = map['eventType'],
+        eventType = HistoryLogEvent.values.byName(map['eventType']),
         payload = map['payload'];
 
   ///Converts a thought to a map that can be saved in the database
   Map<String, dynamic> toMap() {
     return {
       'createdOn': createdOn,
-      'eventType': eventType.toString(),
+      'eventType': eventType.name,
       'payload': payload,
     };
   }

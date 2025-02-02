@@ -5,8 +5,6 @@ import 'package:nuthoughts/models/thought.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
-import '../models/history_log_item.dart';
-
 class PersistedStorage {
   static Database? database;
 
@@ -23,10 +21,6 @@ class PersistedStorage {
 
         db.execute(
           'CREATE TABLE certificateAuthority(id INTEGER PRIMARY KEY, value BLOB)',
-        );
-
-        db.execute(
-          'CREATE TABLE history_log(id INTEGER PRIMARY KEY AUTOINCREMENT, createdOn INTEGER, eventType TEXT, payload TEXT)',
         );
       },
       version: 1,
@@ -67,15 +61,20 @@ class PersistedStorage {
     return maps[0]['value'];
   }
 
-  static Future<int> insertThought(Thought thought) async {
+  static Future<int> insertThought(Thought thought, {includeId = false}) async {
     final Database? database = PersistedStorage.database;
     if (database == null) {
       throw Exception("Cannot insert thought. Database is not open.");
     }
 
+    Map<String, dynamic> data = thought.toMap();
+    if (!includeId) {
+      data.remove('id');
+    }
+
     int id = await database.insert(
       'thoughts',
-      thought.toMap(),
+      data,
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
     return id;
@@ -107,7 +106,7 @@ class PersistedStorage {
     final List<Map<String, dynamic>> maps = await database.query('thoughts');
 
     return List.generate(maps.length, (i) {
-      return Thought.fromDatabase(maps[i]);
+      return Thought.fromMap(maps[i]);
     });
   }
 
@@ -123,33 +122,5 @@ class PersistedStorage {
       // Prevent SQL injection by using whereArgs
       whereArgs: [id],
     );
-  }
-
-  static Future<int> insertHistoryItem(HistoryLogItem item) async {
-    final Database? database = PersistedStorage.database;
-    if (database == null) {
-      throw Exception("Cannot insert history item. Database is not open.");
-    }
-
-    int id = await database.insert(
-      'history_log',
-      item.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
-    return id;
-  }
-
-  static Future<List<HistoryLogItem>> getHistoryLog() async {
-    final Database? database = PersistedStorage.database;
-
-    if (database == null) {
-      throw Exception("Cannot list history items. Database is not open.");
-    }
-
-    final List<Map<String, dynamic>> maps = await database.query('history_log');
-
-    return List.generate(maps.length, (i) {
-      return HistoryLogItem.fromDatabase(maps[i]);
-    });
   }
 }
