@@ -26,6 +26,18 @@ class HistoryLogItem {
     };
   }
 
+  eventTypeString() {
+    if (eventType == HistoryLogEvent.addThought) {
+      return "Thought Added";
+    } else if (eventType == HistoryLogEvent.deleteThought) {
+      return "Thought Deleted";
+    } else if (eventType == HistoryLogEvent.editThought) {
+      return "Thought Edited";
+    } else {
+      return "Unknown";
+    }
+  }
+
   @override
   String toString() {
     return 'HistoryLogItem{id: $id, creationTime: $creationTime, eventType: $eventType, payload: $payload}';

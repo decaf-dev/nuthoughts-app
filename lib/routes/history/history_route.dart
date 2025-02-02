@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nuthoughts/controllers/app_controller.dart';
+import 'package:nuthoughts/models/history_log_item.dart';
+import 'package:nuthoughts/utils/date_utils.dart';
 
 class HistoryRoute extends StatefulWidget {
   const HistoryRoute({super.key});
@@ -21,9 +23,22 @@ class _HistoryRouteState extends State<HistoryRoute> {
         body: Obx(() => ListView.builder(
               itemCount: controller.historyLog.length,
               itemBuilder: (context, index) {
-                return Card(
-                    child: Text(
-                        controller.historyLog[index].eventType.toString()));
+                final HistoryLogItem item = controller.historyLog[index];
+                return GestureDetector(
+                    child: Card(
+                        child: Padding(
+                            padding: const EdgeInsets.all(20),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(item.eventTypeString()),
+                                Text(formatTimeAsString(item.creationTime),
+                                    style: const TextStyle(fontSize: 12)),
+                              ],
+                            ))),
+                    onTap: () {
+                      print("ok");
+                    });
               },
             )));
   }
