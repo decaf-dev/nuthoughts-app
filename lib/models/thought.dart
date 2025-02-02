@@ -7,26 +7,28 @@ class Thought {
   int id = -1;
   int serverSaveTime = -1;
   final String text;
-  late int creationTime;
+  late int createdOn;
 
-  Thought(this.text, {int? creationTime}) {
-    if (creationTime != null) {
-      this.creationTime = creationTime;
+  Thought(this.text, {int? createdOn}) {
+    if (createdOn != null) {
+      this.createdOn = createdOn;
     } else {
-      this.creationTime = DateTime.now().millisecondsSinceEpoch;
+      this.createdOn = DateTime.now().millisecondsSinceEpoch;
     }
   }
 
-  Thought.fromDatabase(Map<String, dynamic> map)
+  Thought.fromJson(String jsonString) : this.fromMap(jsonDecode(jsonString));
+
+  Thought.fromMap(Map<String, dynamic> map)
       : id = map['id'],
         text = map['text'],
-        creationTime = map['creationTime'],
+        createdOn = map['createdOn'],
         serverSaveTime = map['serverSaveTime'];
 
-  ///Converts a thought to a map that can be saved in the database
   Map<String, dynamic> toMap() {
     return {
-      'creationTime': creationTime,
+      'id': id,
+      'createdOn': createdOn,
       'text': text,
       'serverSaveTime': serverSaveTime
     };
@@ -35,14 +37,14 @@ class Thought {
   /// Converts a thought to a json string
   String toJson() {
     return jsonEncode({
-      'creationTime': creationTime,
+      'createdOn': createdOn,
       'text': text,
     });
   }
 
   ///If the thought is older than 3 days and it is has been saved on the server
   bool shouldDelete() {
-    return DateTime.now().millisecondsSinceEpoch - creationTime >
+    return DateTime.now().millisecondsSinceEpoch - createdOn >
             constants.millisDay * 3 &&
         hasBeenSavedOnServer();
   }
@@ -59,6 +61,6 @@ class Thought {
 
   @override
   String toString() {
-    return 'Thought{id: $id, creationTime: $creationTime, text: $text, serverSaveTime: $serverSaveTime}';
+    return 'Thought{id: $id, createdOn: $createdOn, text: $text, serverSaveTime: $serverSaveTime}';
   }
 }

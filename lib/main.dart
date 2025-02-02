@@ -1,12 +1,12 @@
-import 'package:nuthoughts/controllers/app_controller.dart';
-import 'package:nuthoughts/controllers/sql_data.dart';
-import 'package:nuthoughts/routes/home/home_route.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nuthoughts/controllers/app_controller.dart';
+import 'package:nuthoughts/controllers/persisted_storage.dart';
+import 'package:nuthoughts/routes/home/home_route.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await SQLData.initializeDatabase();
+  await PersistedStorage.initDB();
   Get.put(AppController());
   runApp(const MyApp());
 }

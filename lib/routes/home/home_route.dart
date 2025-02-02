@@ -1,9 +1,12 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:nuthoughts/constants.dart';
 import 'package:nuthoughts/controllers/app_controller.dart';
+import 'package:nuthoughts/models/history_log_item.dart';
 import 'package:nuthoughts/models/thought.dart';
 import 'package:nuthoughts/routes/home/app_title.dart';
 import 'package:nuthoughts/routes/home/message_input.dart';
@@ -26,19 +29,26 @@ class _HomeRouteState extends State<HomeRoute> {
   final ScrollController scrollController = ScrollController();
   late StreamSubscription savedThoughtsSubscription;
   Thought? selectedThought;
+  bool isEditing = false;
 
   @override
   initState() {
     super.initState();
     savedThoughtsSubscription = controller.savedThoughts.listen((value) {
-      Future.delayed(const Duration(milliseconds: 10), () {
-        scrollController.animateTo(
-          scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeInOut,
-        );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        scrollToBottom();
       });
     });
+  }
+
+  void scrollToBottom() {
+    if (scrollController.hasClients) {
+      scrollController.animateTo(
+        scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.easeInOut,
+      );
+    }
   }
 
   @override
@@ -57,52 +67,102 @@ class _HomeRouteState extends State<HomeRoute> {
           widget.title,
           selectedThought?.id,
           () {
-            setState(() {
-              selectedThought = null;
-            });
+            if (isEditing) {
+              setState(() {
+                isEditing = false;
+                controller.textController.clear();
+                setState(() {
+                  selectedThought = null;
+                });
+              });
+            } else {
+              setState(() {
+                selectedThought = null;
+              });
+            }
           },
         ),
         actions: selectedThought != null
             ? [
-                IconButton(
-                    icon: const Icon(Icons.copy),
-                    onPressed: () async {
-                      Clipboard.setData(
-                          ClipboardData(text: selectedThought!.text));
-
-                      if (!context.mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Thought copied to clipboard"),
-                          backgroundColor: Colors.blueAccent,
-                        ),
-                      );
-                    }),
-                if (!selectedThought!.hasBeenSavedOnServer()) ...[
+                if (!isEditing)
                   IconButton(
-                    icon: const Icon(Icons.edit),
-                    onPressed: () async {
-                      await controller.restoreThought(selectedThought!.id);
-                      setState(() {
-                        selectedThought = null;
-                      });
-                    },
-                  ),
+                      icon: const Icon(Icons.copy),
+                      onPressed: () async {
+                        Clipboard.setData(
+                            ClipboardData(text: selectedThought!.text));
+
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("Thought copied to clipboard"),
+                            backgroundColor: Colors.blueAccent,
+                          ),
+                        );
+                      }),
+                if (!selectedThought!.hasBeenSavedOnServer() && !isEditing)
+                  IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () async {
+                        await controller
+                            .updateMessageInput(selectedThought!.text);
+                        setState(() {
+                          isEditing = true;
+                        });
+                      }),
+                if (!selectedThought!.hasBeenSavedOnServer() && !isEditing)
                   IconButton(
                     icon: const Icon(Icons.delete),
                     onPressed: () {
-                      showConfirmationDialog(context, "Delete thought",
+                      showConfirmationDialog(context, "Delete Thought",
                           () async {
                         await controller.deleteThought(selectedThought!.id);
+                        await controller.addHistoryItem(
+                            HistoryLogEvent.deleteThought,
+                            jsonEncode(selectedThought));
+
                         setState(() {
                           selectedThought = null;
                         });
                       });
                     },
                   ),
-                ]
               ]
             : [
+                Row(children: [
+                  IconButton(
+                    icon: const Icon(Icons.undo),
+                    color: Colors.white,
+                    onPressed: () async {
+                      if (controller.currentHistoryItemIndex < 0) {
+                        return;
+                      }
+
+                      final HistoryLogItem item = controller
+                          .historyLog[controller.currentHistoryItemIndex];
+                      controller.undoHistoryEvent(item);
+
+                      controller.currentHistoryItemIndex =
+                          controller.currentHistoryItemIndex - 1;
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.redo),
+                    color: Colors.white,
+                    onPressed: () async {
+                      if (controller.currentHistoryItemIndex ==
+                          controller.historyLog.length - 1) {
+                        return;
+                      }
+
+                      controller.currentHistoryItemIndex =
+                          controller.currentHistoryItemIndex + 1;
+
+                      final HistoryLogItem item = controller
+                          .historyLog[controller.currentHistoryItemIndex];
+                      controller.redoHistoryEvent(item);
+                    },
+                  ),
+                ]),
                 IconButton(
                     icon: const Icon(
                       Icons.sync,
@@ -125,39 +185,60 @@ class _HomeRouteState extends State<HomeRoute> {
                     }),
               ],
       ),
-      body: Column(children: [
-        const SizedBox(height: 15),
-        Obx(() => Expanded(
-                child: ListView.builder(
-              controller: scrollController,
-              itemBuilder: (context, index) {
-                return Align(
-                  alignment: Alignment.centerRight,
-                  child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        ThoughtBubble(controller.savedThoughts[index].text, () {
-                          setState(() {
-                            selectedThought = controller.savedThoughts[index];
-                          });
-                        }),
-                        if (controller.savedThoughts[index]
-                            .hasBeenSavedOnServer()) ...[const SavedDisplay()],
-                        if (!controller.savedThoughts[index]
-                            .hasBeenSavedOnServer()) ...[
-                          const SizedBox(height: 15),
-                        ]
-                      ]),
-                );
-              },
-              itemCount: controller.savedThoughts.length,
-            ))),
-        MessageInput(controller.textController, controller.saveText,
-            (String text) {
-          controller.saveThought(text);
-          controller.saveText("");
-        }),
-      ]),
+      body: Column(
+        children: [
+          const SizedBox(height: 15),
+          Obx(() => Expanded(
+                  child: ListView.builder(
+                controller: scrollController,
+                itemBuilder: (context, index) {
+                  return Align(
+                    alignment: Alignment.centerRight,
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          ThoughtBubble(controller.savedThoughts[index].text,
+                              () {
+                            setState(() {
+                              selectedThought = controller.savedThoughts[index];
+                            });
+                          }),
+                          if (controller.savedThoughts[index]
+                              .hasBeenSavedOnServer()) ...[
+                            const SavedDisplay()
+                          ],
+                          if (!controller.savedThoughts[index]
+                              .hasBeenSavedOnServer()) ...[
+                            const SizedBox(height: 15),
+                          ]
+                        ]),
+                  );
+                },
+                itemCount: controller.savedThoughts.length,
+              ))),
+          MessageInput(
+              isEditing, controller.textController, controller.saveText,
+              (String text) async {
+            controller.textController.clear();
+            await controller.saveText("");
+
+            if (isEditing) {
+              final Map<String, dynamic> updatedThought =
+                  await controller.updateThought(selectedThought!.id, text);
+              await controller.addHistoryItem(
+                  HistoryLogEvent.editThought, jsonEncode(updatedThought));
+              setState(() {
+                isEditing = false;
+                selectedThought = null;
+              });
+            } else {
+              final Thought newThought = await controller.createThought(text);
+              await controller.addHistoryItem(
+                  HistoryLogEvent.addThought, jsonEncode(newThought.toMap()));
+            }
+          }),
+        ],
+      ),
     );
   }
 }

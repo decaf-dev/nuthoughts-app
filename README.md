@@ -34,6 +34,6 @@ Open a terminal and in the root directory of the repository run the project
 
 If the app stalls during development on Android, you can try uninstalling it
 
-- `adb uninstall com.example.nuthoughts`
+- `adb uninstall com.nuthoughts.app`
 
 Then try running the app again
