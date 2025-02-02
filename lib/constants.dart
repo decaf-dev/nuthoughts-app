@@ -14,3 +14,4 @@ enum HistoryLogEvent {
 
 const defaultIpAddress = 'localhost';
 const defaultPort = '8123';
+const httpTimeoutSeconds = 5;

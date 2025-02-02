@@ -5,20 +5,20 @@ class HistoryLogItem {
   int id = -1;
   final HistoryLogEvent eventType;
   final String payload;
-  late int createdOn;
+  late int creationTime;
 
   HistoryLogItem(this.eventType, this.payload) {
-    createdOn = DateTime.now().millisecondsSinceEpoch;
+    creationTime = DateTime.now().millisecondsSinceEpoch;
   }
 
   HistoryLogItem.fromDatabase(Map<String, dynamic> map)
       : id = map['id'],
-        createdOn = map['createdOn'],
+        creationTime = map['creationTime'],
         eventType = HistoryLogEvent.values.byName(map['eventType']),
         payload = map['payload'];
 
   @override
   String toString() {
-    return 'HistoryLogItem{id: $id, createdOn: $createdOn, eventType: $eventType, payload: $payload}';
+    return 'HistoryLogItem{id: $id, creationTime: $creationTime, eventType: $eventType, payload: $payload}';
   }
 }

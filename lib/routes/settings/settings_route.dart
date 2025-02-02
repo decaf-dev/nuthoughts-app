@@ -2,9 +2,9 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:nuthoughts/controllers/app_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nuthoughts/controllers/app_controller.dart';
 import 'package:settings_ui/settings_ui.dart';
 
 class SettingsRoute extends StatefulWidget {
@@ -58,6 +58,7 @@ class _SettingsRouteState extends State<SettingsRoute> {
 
                       if (result != null) {
                         File file = File(result.files.single.path!);
+                        print(file.path);
                         Uint8List data = await file.readAsBytes();
                         await controller.saveCertificateAuthority(data);
 
