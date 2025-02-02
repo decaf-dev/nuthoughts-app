@@ -20,6 +20,7 @@ class AppController extends GetxController {
   final RxString ipAddress = ''.obs;
   final RxString port = ''.obs;
   final Rx<Thought> selectedThought = Thought("").obs;
+  final RxString themeMode = 'system'.obs;
 
   final TextEditingController textController = TextEditingController();
   final GlobalKey scaffoldKey = GlobalKey();
@@ -55,7 +56,6 @@ class AppController extends GetxController {
   }
 
   Future<void> syncThoughts() async {
-    print("Syncing thoughts");
     //Get the thoughts that haven't been saved
     List<Thought> thoughtsToSave = savedThoughts
         .where((thought) => thought.hasBeenSavedOnServer() == false)
@@ -63,7 +63,7 @@ class AppController extends GetxController {
 
     IOClient? ioClient = this.ioClient;
     if (ioClient == null) {
-      displayErrorSnackBar(scaffoldKey.currentContext!,
+      showSnackBar(scaffoldKey.currentContext!, SnackBarType.error,
           "No certificate authority found. Please set one in settings.");
       return;
     }
@@ -72,20 +72,27 @@ class AppController extends GetxController {
       for (Thought thought in thoughtsToSave) {
         try {
           await _postThought(ioClient, thought);
-        } on HandshakeException catch (err) {
-          print(err);
-          displayErrorSnackBar(scaffoldKey.currentContext!,
+
+          historyLog.removeWhere((el) {
+            if (el.eventType == HistoryLogEvent.editThought) {
+              return Thought.fromJson(jsonDecode(el.payload)['old']).id ==
+                  thought.id;
+            }
+            return Thought.fromJson(el.payload).id == thought.id;
+          });
+          currentHistoryItemIndex = historyLog.length - 1;
+        } on HandshakeException catch (_) {
+          showSnackBar(scaffoldKey.currentContext!, SnackBarType.error,
               "Handshake error. Invalid certificate authority");
           break;
-        } on SocketException catch (err) {
-          print(err);
-          displayErrorSnackBar(
-              scaffoldKey.currentContext!, "Error connecting to server");
+        } on SocketException catch (_) {
+          showSnackBar(scaffoldKey.currentContext!, SnackBarType.error,
+              "Error connecting to server");
           break;
         } catch (err) {
           print(err);
-          displayErrorSnackBar(
-              scaffoldKey.currentContext!, "Unhandled exception");
+          showSnackBar(scaffoldKey.currentContext!, SnackBarType.error,
+              "Unhandled exception");
           break;
         }
       }
@@ -96,7 +103,6 @@ class AppController extends GetxController {
   Future<void> addHistoryItem(
       constants.HistoryLogEvent eventType, String text) async {
     final HistoryLogItem item = HistoryLogItem(eventType, text);
-    print(item);
 
     historyLog.add(item);
     historyLog.refresh();
@@ -159,7 +165,6 @@ class AppController extends GetxController {
   }
 
   Future<void> saveCertificateAuthority(Uint8List value) async {
-    print("saveCertificateAuthority");
     await PersistedStorage.insertCertificateAuthority(value);
     _loadCertificateAuthority(value);
   }
@@ -207,8 +212,6 @@ class AppController extends GetxController {
   ///Return true if receives 201
   ///Otherwise returns false
   Future<void> _postThought(IOClient ioClient, Thought thought) async {
-    print("POST https://${ipAddress.value}:${port.value}/thought");
-    print(thought);
     final response = await ioClient.post(
         Uri.parse('https://${ipAddress.value}:${port.value}/thought'),
         headers: <String, String>{

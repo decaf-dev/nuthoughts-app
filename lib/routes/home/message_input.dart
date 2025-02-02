@@ -42,51 +42,56 @@ class _MessageInputState extends State<MessageInput> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        color: ThemeData.dark().cardColor,
-        child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: <Widget>[
-                Expanded(
-                    child: Padding(
-                        padding: const EdgeInsets.only(left: 8),
-                        child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (widget.isEditing)
-                                const Text(
-                                  'Editing Thought',
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              TextField(
-                                autofocus: true,
-                                minLines: 1,
-                                maxLines: 5,
-                                keyboardType: TextInputType.multiline,
-                                decoration: const InputDecoration(
-                                  hintText: 'What are you thinking?',
-                                ),
-                                controller: widget.textController,
-                                onChanged: (text) {
-                                  setState(() {});
-                                  widget.onChanged(widget.textController.text);
-                                },
+    return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: <Widget>[
+            Expanded(
+                child: Padding(
+                    padding: const EdgeInsets.only(left: 15),
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (widget.isEditing)
+                            const Text(
+                              'Editing Thought',
+                              style: TextStyle(
+                                // color: Colors.grey,
+                                fontSize: 12,
                               ),
-                            ]))),
-                IconButton(
-                  icon: const Icon(Icons.send),
-                  color: Colors.blueAccent,
-                  disabledColor: Colors.grey,
-                  onPressed: widget.textController.text.trim().isEmpty
-                      ? null
-                      : _sendMessage,
-                ),
-              ],
-            )));
+                            ),
+                          TextField(
+                            cursorColor:
+                                Theme.of(context).colorScheme.onPrimary,
+                            autofocus: true,
+                            minLines: 1,
+                            maxLines: 5,
+                            keyboardType: TextInputType.multiline,
+                            decoration: InputDecoration(
+                                border: const OutlineInputBorder(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(25)),
+                                ),
+                                hintText: 'What are you thinking?',
+                                filled: true,
+                                fillColor:
+                                    Theme.of(context).colorScheme.secondary),
+                            controller: widget.textController,
+                            onChanged: (text) {
+                              setState(() {});
+                              widget.onChanged(widget.textController.text);
+                            },
+                          ),
+                        ]))),
+            IconButton(
+              icon: const Icon(Icons.send_outlined),
+              color: Theme.of(context).colorScheme.tertiary,
+              onPressed: widget.textController.text.trim().isEmpty
+                  ? null
+                  : _sendMessage,
+            ),
+          ],
+        ));
   }
 }

@@ -18,14 +18,18 @@ Future<void> showConfirmationDialog(
         ),
         actions: <Widget>[
           TextButton(
-            child: const Text('Cancel'),
+            child: Text('Cancel',
+                style:
+                    TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
             onPressed: () {
               onCancelPressed ?? ();
               Navigator.of(context).pop();
             },
           ),
           TextButton(
-            child: const Text('Confirm'),
+            child: Text('Confirm',
+                style:
+                    TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
             onPressed: () {
               onConfirmPressed();
               Navigator.of(context).pop();

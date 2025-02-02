@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nuthoughts/controllers/app_controller.dart';
+import 'package:nuthoughts/utils/snackbar_utils.dart';
 import 'package:settings_ui/settings_ui.dart';
 
 class SettingsRoute extends StatefulWidget {
@@ -26,6 +27,37 @@ class _SettingsRouteState extends State<SettingsRoute> {
         body: Obx(
           () => SettingsList(
             sections: [
+              SettingsSection(
+                  title: const Text('General'),
+                  tiles: <SettingsTile>[
+                    SettingsTile.navigation(
+                      leading: const Icon(Icons.color_lens),
+                      title: const Text('Theme'),
+                      // The trailing widget is a DropdownButton that shows the current theme mode.
+                      trailing: DropdownButton<String>(
+                        value: controller.themeMode.value,
+                        items: const [
+                          DropdownMenuItem(
+                            value: "system",
+                            child: Text("System default"),
+                          ),
+                          DropdownMenuItem(
+                            value: "light",
+                            child: Text("Light"),
+                          ),
+                          DropdownMenuItem(
+                            value: "dark",
+                            child: Text("Dark"),
+                          ),
+                        ],
+                        onChanged: (String? newValue) {
+                          if (newValue != null) {
+                            controller.themeMode.value = newValue;
+                          }
+                        },
+                      ),
+                    ),
+                  ]),
               SettingsSection(
                 title: const Text('Server'),
                 tiles: <SettingsTile>[
@@ -58,16 +90,12 @@ class _SettingsRouteState extends State<SettingsRoute> {
 
                       if (result != null) {
                         File file = File(result.files.single.path!);
-                        print(file.path);
                         Uint8List data = await file.readAsBytes();
                         await controller.saveCertificateAuthority(data);
 
                         if (!context.mounted) return;
-                        const SnackBar snackBar = SnackBar(
-                          backgroundColor: Colors.green,
-                          content: Text('Certificate authority saved'),
-                        );
-                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                        showSnackBar(context, SnackBarType.success,
+                            'Certificate authority saved');
                       }
                     },
                   ),
@@ -85,19 +113,33 @@ class _SettingsRouteState extends State<SettingsRoute> {
         builder: (context) {
           return AlertDialog(
             title: Text(title),
-            content: TextField(controller: textController, autofocus: true),
+            content: TextField(
+              cursorColor: Theme.of(context).colorScheme.onPrimary,
+              controller: textController,
+              autofocus: true,
+              decoration: InputDecoration(
+                  border: const OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(25)),
+                  ),
+                  filled: true,
+                  fillColor: Theme.of(context).colorScheme.secondary),
+            ),
             actions: <Widget>[
               TextButton(
                   onPressed: () {
                     _dismissDialog();
                   },
-                  child: const Text('Close')),
+                  child: Text('Close',
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.onPrimary))),
               TextButton(
                 onPressed: () {
                   onSave(textController.text);
                   _dismissDialog();
                 },
-                child: const Text('Save'),
+                child: Text('Save',
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.onPrimary)),
               )
             ],
           );
