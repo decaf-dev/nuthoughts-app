@@ -124,7 +124,7 @@ class AppController extends GetxController {
     Thought updatedThought = Thought.fromMap({
       'id': selectedThought.id,
       'text': text,
-      'createdOn': selectedThought.createdOn,
+      'creationTime': selectedThought.creationTime,
       'serverSaveTime': selectedThought.serverSaveTime,
     });
 
@@ -163,6 +163,10 @@ class AppController extends GetxController {
 
     //TODO there was a bug where changing from an invalid to a new certificate
     //wasn't updating. Does this function update?
+
+    //If you load a invalid certificate into memory
+    //and then load a valid one
+    //this doesn't work
     SecurityContext.defaultContext.setTrustedCertificatesBytes(value);
   }
 
@@ -203,10 +207,14 @@ class AppController extends GetxController {
               'Content-Type': 'application/json; charset=UTF-8',
             },
             body: thought.toJson())
-        .timeout(const Duration(seconds: 10));
+        .timeout(const Duration(seconds: 3));
     if (response.statusCode == 201) {
       thought.savedOnServer();
       await PersistedStorage.updateThought(thought);
+    } else {
+      print(response.statusCode);
+      print(response.body);
+      throw Exception('Failed to post thought');
     }
   }
 

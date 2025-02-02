@@ -16,7 +16,7 @@ class PersistedStorage {
       join(await getDatabasesPath(), 'nuthoughts.db'),
       onCreate: (db, version) {
         db.execute(
-          'CREATE TABLE thoughts(id INTEGER PRIMARY KEY AUTOINCREMENT, text TEXT, createdOn INTEGER, serverSaveTime INTEGER)',
+          'CREATE TABLE thoughts(id INTEGER PRIMARY KEY AUTOINCREMENT, text TEXT, creationTime INTEGER, serverSaveTime INTEGER)',
         );
 
         db.execute(
