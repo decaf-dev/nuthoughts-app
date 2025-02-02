@@ -11,3 +11,6 @@ enum HistoryLogEvent {
   addThought,
   deleteThought,
 }
+
+const defaultIpAddress = 'localhost';
+const defaultPort = '8123';

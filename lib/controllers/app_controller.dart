@@ -13,22 +13,24 @@ import 'package:nuthoughts/utils/snackbar_utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppController extends GetxController {
-  final savedThoughts = <Thought>[].obs;
-  final historyLog = <HistoryLogItem>[].obs;
-  final ipAddress = ''.obs;
-  final port = ''.obs;
+  final RxList<Thought> savedThoughts = <Thought>[].obs;
+  final RxList<HistoryLogItem> historyLog = <HistoryLogItem>[].obs;
+  final RxString ipAddress = ''.obs;
+  final RxString port = ''.obs;
   int selectedHistoryItemId = -1.obs;
 
+  final TextEditingController textController = TextEditingController();
+  final GlobalKey scaffoldKey = GlobalKey();
+
   late SharedPreferences _prefs;
-  TextEditingController textController = TextEditingController();
-  GlobalKey scaffoldKey = GlobalKey();
 
   @override
   void onInit() async {
     _prefs = await SharedPreferences.getInstance();
 
-    ipAddress.value = _prefs.getString(constants.ipAddressKey) ?? 'localhost';
-    port.value = _prefs.getString(constants.portKey) ?? '8123';
+    ipAddress.value =
+        _prefs.getString(constants.ipAddressKey) ?? constants.defaultIpAddress;
+    port.value = _prefs.getString(constants.portKey) ?? constants.defaultPort;
 
     Uint8List? caData = await PersistedStorage.getCertificateAuthority();
     if (caData != null) {
@@ -43,6 +45,10 @@ class AppController extends GetxController {
 
   Future<void> selectHistoryItem(int id) {
     selectedHistoryItemId = id;
+
+    //If you select one that is ahead of the current index, replay each event forward
+    //If you select one that is behind the current index, replay each event backwards
+
     historyLog.refresh();
     return Future.value();
   }
