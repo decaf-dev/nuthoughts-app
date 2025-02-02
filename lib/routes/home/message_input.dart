@@ -37,7 +37,7 @@ class _MessageInputState extends State<MessageInput> {
   }
 
   void _sendMessage() {
-    widget.onSendPressed(widget.textController.text);
+    widget.onSendPressed(widget.textController.text.trim());
   }
 
   @override
@@ -47,6 +47,7 @@ class _MessageInputState extends State<MessageInput> {
         child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: <Widget>[
                 Expanded(
                     child: Padding(
@@ -81,8 +82,9 @@ class _MessageInputState extends State<MessageInput> {
                   icon: const Icon(Icons.send),
                   color: Colors.blueAccent,
                   disabledColor: Colors.grey,
-                  onPressed:
-                      widget.textController.text.isEmpty ? null : _sendMessage,
+                  onPressed: widget.textController.text.trim().isEmpty
+                      ? null
+                      : _sendMessage,
                 ),
               ],
             )));
