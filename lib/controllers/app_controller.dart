@@ -75,7 +75,8 @@ class AppController extends GetxController {
 
           historyLog.removeWhere((el) {
             if (el.eventType == HistoryLogEvent.editThought) {
-              return Thought.fromJson(jsonDecode(el.payload)).id == thought.id;
+              return Thought.fromJson(jsonDecode(el.payload)['old']).id ==
+                  thought.id;
             }
             return Thought.fromJson(el.payload).id == thought.id;
           });
