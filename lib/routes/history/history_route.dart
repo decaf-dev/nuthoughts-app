@@ -36,7 +36,7 @@ class _HistoryRouteState extends State<HistoryRoute> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(item.eventTypeString()),
-                                Text(formatTimeAsString(item.creationTime),
+                                Text(formatTimeAsString(item.createdOn),
                                     style: const TextStyle(fontSize: 12)),
                               ],
                             ))),

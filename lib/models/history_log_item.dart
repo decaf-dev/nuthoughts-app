@@ -5,22 +5,22 @@ class HistoryLogItem {
   int id = -1;
   final HistoryLogEvent eventType;
   final String payload;
-  late int creationTime;
+  late int createdOn;
 
   HistoryLogItem(this.eventType, this.payload) {
-    creationTime = DateTime.now().millisecondsSinceEpoch;
+    createdOn = DateTime.now().millisecondsSinceEpoch;
   }
 
   HistoryLogItem.fromDatabase(Map<String, dynamic> map)
       : id = map['id'],
-        creationTime = map['creationTime'],
+        createdOn = map['createdOn'],
         eventType = map['eventType'],
         payload = map['payload'];
 
   ///Converts a thought to a map that can be saved in the database
   Map<String, dynamic> toMap() {
     return {
-      'creationTime': creationTime,
+      'createdOn': createdOn,
       'eventType': eventType.toString(),
       'payload': payload,
     };
@@ -40,6 +40,6 @@ class HistoryLogItem {
 
   @override
   String toString() {
-    return 'HistoryLogItem{id: $id, creationTime: $creationTime, eventType: $eventType, payload: $payload}';
+    return 'HistoryLogItem{id: $id, createdOn: $createdOn, eventType: $eventType, payload: $payload}';
   }
 }
