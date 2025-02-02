@@ -34,14 +34,20 @@ class _HomeRouteState extends State<HomeRoute> {
   initState() {
     super.initState();
     savedThoughtsSubscription = controller.savedThoughts.listen((value) {
-      Future.delayed(const Duration(milliseconds: 10), () {
-        scrollController.animateTo(
-          scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeInOut,
-        );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        scrollToBottom();
       });
     });
+  }
+
+  void scrollToBottom() {
+    if (scrollController.hasClients) {
+      scrollController.animateTo(
+        scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.easeInOut,
+      );
+    }
   }
 
   @override
