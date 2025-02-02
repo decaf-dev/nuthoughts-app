@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:nuthoughts/constants.dart';
 import 'package:nuthoughts/controllers/app_controller.dart';
 import 'package:nuthoughts/models/thought.dart';
+import 'package:nuthoughts/routes/history/history_route.dart';
 import 'package:nuthoughts/routes/home/app_title.dart';
 import 'package:nuthoughts/routes/home/message_input.dart';
 import 'package:nuthoughts/routes/home/saved_display.dart';
@@ -83,6 +86,9 @@ class _HomeRouteState extends State<HomeRoute> {
                     icon: const Icon(Icons.edit),
                     onPressed: () async {
                       await controller.restoreThought(selectedThought!.id);
+                      await controller.addHistoryItem(
+                          HistoryLogEvent.editThought,
+                          jsonEncode(selectedThought));
                       setState(() {
                         selectedThought = null;
                       });
@@ -94,6 +100,10 @@ class _HomeRouteState extends State<HomeRoute> {
                       showConfirmationDialog(context, "Delete thought",
                           () async {
                         await controller.deleteThought(selectedThought!.id);
+                        await controller.addHistoryItem(
+                            HistoryLogEvent.deleteThought,
+                            jsonEncode(selectedThought));
+
                         setState(() {
                           selectedThought = null;
                         });
@@ -110,6 +120,18 @@ class _HomeRouteState extends State<HomeRoute> {
                     ),
                     onPressed: () {
                       controller.syncThoughts();
+                    }),
+                IconButton(
+                    icon: const Icon(
+                      Icons.history,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const HistoryRoute()),
+                      );
                     }),
                 IconButton(
                     icon: const Icon(
@@ -153,9 +175,11 @@ class _HomeRouteState extends State<HomeRoute> {
               itemCount: controller.savedThoughts.length,
             ))),
         MessageInput(controller.textController, controller.saveText,
-            (String text) {
-          controller.saveThought(text);
-          controller.saveText("");
+            (String text) async {
+          await controller.saveThought(text);
+          await controller.addHistoryItem(
+              HistoryLogEvent.addThought, jsonEncode(selectedThought));
+          await controller.saveText("");
         }),
       ]),
     );

@@ -3,16 +3,18 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:nuthoughts/constants.dart' as constants;
-import 'package:nuthoughts/controllers/sql_data.dart';
-import 'package:nuthoughts/models/thought.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:nuthoughts/constants.dart' as constants;
+import 'package:nuthoughts/controllers/persisted_storage.dart';
+import 'package:nuthoughts/models/history_log_item.dart';
+import 'package:nuthoughts/models/thought.dart';
 import 'package:nuthoughts/utils/snackbar_utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppController extends GetxController {
   final savedThoughts = <Thought>[].obs;
+  final historyLog = <HistoryLogItem>[].obs;
   final ipAddress = ''.obs;
   final port = ''.obs;
 
@@ -27,12 +29,13 @@ class AppController extends GetxController {
     ipAddress.value = _prefs.getString(constants.ipAddressKey) ?? 'localhost';
     port.value = _prefs.getString(constants.portKey) ?? '8123';
 
-    Uint8List? caData = await SQLData.getCertificateAuthority();
+    Uint8List? caData = await PersistedStorage.getCertificateAuthority();
     if (caData != null) {
       _updateSecurityContext(caData);
     }
 
     await _pruneOldThoughts();
+    historyLog.value = await PersistedStorage.getHistoryLog();
 
     super.onInit();
   }
@@ -72,11 +75,19 @@ class AppController extends GetxController {
     }
   }
 
-  void saveThought(String text) async {
+  Future<void> addHistoryItem(
+      constants.HistoryLogEvent eventType, String text) async {
+    final HistoryLogItem item = HistoryLogItem(eventType, text);
+    await PersistedStorage.insertHistoryItem(item);
+    historyLog.add(item);
+    historyLog.refresh();
+  }
+
+  Future<void> saveThought(String text) async {
     //Save the thought
     final Thought thought = Thought(text.trim());
 
-    int id = await SQLData.insertThought(thought);
+    int id = await PersistedStorage.insertThought(thought);
     //Set the id, this is important for future operations
     thought.id = id;
 
@@ -99,7 +110,7 @@ class AppController extends GetxController {
   }
 
   Future<void> saveCertificateAuthority(Uint8List value) async {
-    await SQLData.insertCertificateAuthority(value);
+    await PersistedStorage.insertCertificateAuthority(value);
     _updateSecurityContext(value);
   }
 
@@ -118,19 +129,19 @@ class AppController extends GetxController {
     textController.text += thought.text;
     saveText(textController.text);
 
-    await SQLData.deleteThought(id);
+    await PersistedStorage.deleteThought(id);
     savedThoughts.removeWhere((el) => el.id == id);
     savedThoughts.refresh();
   }
 
   Future<void> deleteThought(int id) async {
-    await SQLData.deleteThought(id);
+    await PersistedStorage.deleteThought(id);
     savedThoughts.removeWhere((el) => el.id == id);
     savedThoughts.refresh();
   }
 
   Future<void> _pruneOldThoughts() async {
-    List<Thought> thoughts = await SQLData.listThoughts();
+    List<Thought> thoughts = await PersistedStorage.getThoughts();
 
     //Create a copy of the list to prevent concurrent modification
     //Concurrent modification during iteration
@@ -138,7 +149,7 @@ class AppController extends GetxController {
       int id = thought.id;
       if (id != -1) {
         if (thought.shouldDelete()) {
-          await SQLData.deleteThought(id);
+          await PersistedStorage.deleteThought(id);
           thoughts.removeWhere((el) => el.id == id);
         }
       }
@@ -163,7 +174,7 @@ class AppController extends GetxController {
         .timeout(const Duration(seconds: 10));
     if (response.statusCode == 201) {
       thought.savedOnServer();
-      await SQLData.updateThought(thought);
+      await PersistedStorage.updateThought(thought);
     }
   }
 }
