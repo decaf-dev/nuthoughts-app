@@ -101,18 +101,14 @@ class _HomeRouteState extends State<HomeRoute> {
                       }),
                 if (!selectedThought!.hasBeenSavedOnServer() && !isEditing)
                   IconButton(
-                    icon: const Icon(Icons.edit),
-                    onPressed: () async {
-                      await controller
-                          .updateMessageInput(selectedThought!.text);
-                      setState(() {
-                        isEditing = true;
-                      });
-                      // await controller.addHistoryItem(
-                      //     HistoryLogEvent.editThought,
-                      //     jsonEncode(selectedThought));
-                    },
-                  ),
+                      icon: const Icon(Icons.edit),
+                      onPressed: () async {
+                        await controller
+                            .updateMessageInput(selectedThought!.text);
+                        setState(() {
+                          isEditing = true;
+                        });
+                      }),
                 if (!selectedThought!.hasBeenSavedOnServer() && !isEditing)
                   IconButton(
                     icon: const Icon(Icons.delete),
