@@ -23,9 +23,13 @@ class _HistoryRouteState extends State<HistoryRoute> {
         body: Obx(() => ListView.builder(
               itemCount: controller.historyLog.length,
               itemBuilder: (context, index) {
-                final HistoryLogItem item = controller.historyLog[index];
+                final HistoryLogItem item = controller
+                    .historyLog[controller.historyLog.length - index - 1];
                 return GestureDetector(
                     child: Card(
+                        color: controller.selectedHistoryItemId == item.id
+                            ? Colors.blue
+                            : Colors.transparent,
                         child: Padding(
                             padding: const EdgeInsets.all(20),
                             child: Column(
@@ -37,7 +41,7 @@ class _HistoryRouteState extends State<HistoryRoute> {
                               ],
                             ))),
                     onTap: () {
-                      print("ok");
+                      controller.selectHistoryItem(item.id);
                     });
               },
             )));

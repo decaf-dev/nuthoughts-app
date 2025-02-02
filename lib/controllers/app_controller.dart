@@ -17,6 +17,7 @@ class AppController extends GetxController {
   final historyLog = <HistoryLogItem>[].obs;
   final ipAddress = ''.obs;
   final port = ''.obs;
+  int selectedHistoryItemId = -1.obs;
 
   late SharedPreferences _prefs;
   TextEditingController textController = TextEditingController();
@@ -38,6 +39,12 @@ class AppController extends GetxController {
     historyLog.value = await PersistedStorage.getHistoryLog();
 
     super.onInit();
+  }
+
+  Future<void> selectHistoryItem(int id) {
+    selectedHistoryItemId = id;
+    historyLog.refresh();
+    return Future.value();
   }
 
   Future<void> syncThoughts() async {
@@ -78,7 +85,9 @@ class AppController extends GetxController {
   Future<void> addHistoryItem(
       constants.HistoryLogEvent eventType, String text) async {
     final HistoryLogItem item = HistoryLogItem(eventType, text);
-    await PersistedStorage.insertHistoryItem(item);
+    int id = await PersistedStorage.insertHistoryItem(item);
+    item.id = id;
+
     historyLog.add(item);
     historyLog.refresh();
   }
@@ -88,7 +97,6 @@ class AppController extends GetxController {
     final Thought thought = Thought(text.trim());
 
     int id = await PersistedStorage.insertThought(thought);
-    //Set the id, this is important for future operations
     thought.id = id;
 
     savedThoughts.add(thought);
