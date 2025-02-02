@@ -14,15 +14,8 @@ showSnackBar(BuildContext context, SnackBarType type, String message) {
 
   SnackBar snackBar = SnackBar(
     backgroundColor: color,
-    content: Text(message),
-    action: type == SnackBarType.error
-        ? SnackBarAction(
-            label: 'Dismiss',
-            onPressed: () {
-              ScaffoldMessenger.of(context).hideCurrentSnackBar();
-            },
-          )
-        : null,
+    content: Text(message,
+        style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
   );
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
 }
