@@ -28,6 +28,37 @@ class _SettingsRouteState extends State<SettingsRoute> {
           () => SettingsList(
             sections: [
               SettingsSection(
+                  title: const Text('General'),
+                  tiles: <SettingsTile>[
+                    SettingsTile.navigation(
+                      leading: const Icon(Icons.color_lens),
+                      title: const Text('Theme'),
+                      // The trailing widget is a DropdownButton that shows the current theme mode.
+                      trailing: DropdownButton<String>(
+                        value: controller.themeMode.value,
+                        items: const [
+                          DropdownMenuItem(
+                            value: "system",
+                            child: Text("System default"),
+                          ),
+                          DropdownMenuItem(
+                            value: "light",
+                            child: Text("Light"),
+                          ),
+                          DropdownMenuItem(
+                            value: "dark",
+                            child: Text("Dark"),
+                          ),
+                        ],
+                        onChanged: (String? newValue) {
+                          if (newValue != null) {
+                            controller.themeMode.value = newValue;
+                          }
+                        },
+                      ),
+                    ),
+                  ]),
+              SettingsSection(
                 title: const Text('Server'),
                 tiles: <SettingsTile>[
                   SettingsTile.navigation(

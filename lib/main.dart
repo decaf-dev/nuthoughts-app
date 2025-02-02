@@ -17,12 +17,19 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'NuThoughts',
-      theme: theme,
-      darkTheme: darkTheme,
-      themeMode: ThemeMode.system,
-      home: const HomeRoute(title: 'NuThoughts'),
-    );
+    final AppController controller = Get.find();
+
+    return Obx(() => MaterialApp(
+          title: 'NuThoughts',
+          theme: theme,
+          darkTheme: darkTheme,
+          themeMode: controller.themeMode.value == 'system'
+              ? ThemeMode.system
+              : controller.themeMode.value == 'light'
+                  ? ThemeMode.light
+                  : ThemeMode.dark,
+          themeAnimationDuration: Duration.zero,
+          home: const HomeRoute(title: 'NuThoughts'),
+        ));
   }
 }

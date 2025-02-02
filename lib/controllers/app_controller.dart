@@ -20,6 +20,7 @@ class AppController extends GetxController {
   final RxString ipAddress = ''.obs;
   final RxString port = ''.obs;
   final Rx<Thought> selectedThought = Thought("").obs;
+  final RxString themeMode = 'system'.obs;
 
   final TextEditingController textController = TextEditingController();
   final GlobalKey scaffoldKey = GlobalKey();
