@@ -1,15 +1,15 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:nuthoughts/controllers/app_controller.dart';
 import 'package:nuthoughts/models/thought.dart';
 import 'package:nuthoughts/routes/home/app_title.dart';
+import 'package:nuthoughts/routes/home/message_input.dart';
 import 'package:nuthoughts/routes/home/saved_display.dart';
 import 'package:nuthoughts/routes/home/thought_bubble.dart';
 import 'package:nuthoughts/routes/settings/settings_route.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:nuthoughts/routes/home/message_input.dart';
 import 'package:nuthoughts/widgets/confirmation.dart';
 
 class HomeRoute extends StatefulWidget {
@@ -80,13 +80,11 @@ class _HomeRouteState extends State<HomeRoute> {
                     }),
                 if (!selectedThought!.hasBeenSavedOnServer()) ...[
                   IconButton(
-                    icon: const Icon(Icons.restore),
+                    icon: const Icon(Icons.edit),
                     onPressed: () async {
-                      showConfirmationDialog(context, "Undo thought", () async {
-                        await controller.restoreThought(selectedThought!.id);
-                        setState(() {
-                          selectedThought = null;
-                        });
+                      await controller.restoreThought(selectedThought!.id);
+                      setState(() {
+                        selectedThought = null;
                       });
                     },
                   ),
