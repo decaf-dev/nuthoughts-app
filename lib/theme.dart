@@ -17,14 +17,19 @@ final ThemeData theme = ThemeData(
       outline: lightGray),
 );
 
+const Color darkBlue2 = Color(0xff1c232e);
+const Color darkerBlue2 = Color(0xff11191f);
+const Color darkGray = Color(0xff4f5457);
+const Color borderGray = Color(0xff3a4147);
+
 final ThemeData darkTheme = ThemeData(
   useMaterial3: true,
-  colorScheme: ColorScheme.fromSeed(
-    seedColor: Colors.purple,
-    brightness: Brightness.dark,
-  ),
-  appBarTheme: const AppBarTheme(
-    backgroundColor: Colors.black,
-    foregroundColor: Colors.black,
-  ),
+  colorScheme: ColorScheme.dark(
+      primary: darkBlue2,
+      onPrimary: Colors.white,
+      secondary: darkBlue2,
+      onSecondary: darkGray,
+      tertiary: Colors.blue,
+      onTertiary: Colors.white,
+      outline: borderGray),
 );

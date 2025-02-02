@@ -20,8 +20,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'NuThoughts',
       theme: theme,
-      //darkTheme: darkTheme,
-      // darkTheme: ThemeData.dark(), // standard dark theme
+      darkTheme: darkTheme,
       themeMode: ThemeMode.system,
       home: const HomeRoute(title: 'NuThoughts'),
     );
