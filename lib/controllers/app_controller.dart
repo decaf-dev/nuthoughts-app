@@ -47,8 +47,6 @@ class AppController extends GetxController {
     //Only preform the action if not empty
     if (thoughtsToSave.isNotEmpty) {
       //Attempt to sync every thought
-      // List<bool> result = await Future.wait(
-      //     thoughtsToSave.map((thought) => _thoughtPost(thought)));
 
       for (Thought thought in thoughtsToSave) {
         try {
