@@ -68,8 +68,8 @@ class AppController extends GetxController {
           break;
         } on SocketException catch (err) {
           print(err);
-          displayErrorSnackBar(scaffoldKey.currentContext!,
-              "Socket error. Cannot connect to server.\nCheck IP address and port.\nIs the server running?");
+          displayErrorSnackBar(
+              scaffoldKey.currentContext!, "Error connecting to server");
           break;
         } catch (err) {
           print(err);
